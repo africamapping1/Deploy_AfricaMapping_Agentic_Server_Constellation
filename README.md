@@ -39,3 +39,37 @@ No change enters the constellation unexamined.
 
 Deployment is not the end.
 It is the beginning of local life.
+
+---
+
+## Status
+
+This repository defines an evolving architecture for a governed intelligent server constellation.
+
+It is currently in an early phase focused on:
+
+- lifecycle definition  
+- flow modeling  
+- server role separation  
+- governance structure  
+
+Implementation is intentionally incremental.
+
+---
+
+## Philosophy
+
+The system is not static.
+
+It is designed to:
+
+- receive change  
+- evaluate change  
+- govern change  
+- execute safely  
+- observe outcomes  
+- learn and evolve  
+
+Deployment is not the end.  
+It is the beginning of local life.
+
