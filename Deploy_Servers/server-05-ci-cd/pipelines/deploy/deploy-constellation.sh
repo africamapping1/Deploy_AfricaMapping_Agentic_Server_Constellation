@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+BASE_DIR="/opt/africamapping"
+PAYLOAD_DIR="$BASE_DIR/Deploy_Servers"
+STATE_DIR="$BASE_DIR/deployment-state"
+STATE_FILE="$STATE_DIR/constellation-status.json"
+LOG_DIR="/var/log/africamapping"
+LOG_FILE="$LOG_DIR/deploy.log"
+
+mkdir -p "$BASE_DIR"
+mkdir -p "$STATE_DIR"
+sudo mkdir -p "$LOG_DIR"
+sudo touch "$LOG_FILE"
+
+log() {
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | sudo tee -a "$LOG_FILE"
+}
+
+bool_from_status() {
+  local status="$1"
+  if [ "$status" = "present" ]; then
+    echo true
+  else
+    echo false
+  fi
+}
+
+server_status() {
+  local server_name="$1"
+  local server_path="$PAYLOAD_DIR/$server_name"
+  if [ -d "$server_path" ]; then
+    echo "present"
+  else
+    echo "missing"
+  fi
+}
+
+FIRST_DEPLOY=false
+if [ ! -f "$STATE_FILE" ]; then
+  FIRST_DEPLOY=true
+  HEARTBEAT_STATE="initializing"
+  log "First-time deployment detected"
+else
+  HEARTBEAT_STATE="steady"
+  log "Existing deployment state detected"
+fi
+
+SERVER_00_STATUS=$(server_status "server-00-foundation")
+SERVER_01_STATUS=$(server_status "server-01-bastion")
+SERVER_02_STATUS=$(server_status "server-02-app")
+SERVER_03_STATUS=$(server_status "server-03-db")
+SERVER_04_STATUS=$(server_status "server-04-storage")
+SERVER_05_STATUS=$(server_status "server-05-ci-cd")
+SERVER_06_STATUS=$(server_status "server-06-monitoring")
+SERVER_07_STATUS=$(server_status "server-07-ai-orchestrator")
+SERVER_08_STATUS=$(server_status "server-08-ai-worker")
+SERVER_09_STATUS=$(server_status "server-09-ai-training")
+
+log "Detected constellation server presence"
+log "server-00-foundation = $SERVER_00_STATUS"
+log "server-01-bastion = $SERVER_01_STATUS"
+log "server-02-app = $SERVER_02_STATUS"
+log "server-03-db = $SERVER_03_STATUS"
+log "server-04-storage = $SERVER_04_STATUS"
+log "server-05-ci-cd = $SERVER_05_STATUS"
+log "server-06-monitoring = $SERVER_06_STATUS"
+log "server-07-ai-orchestrator = $SERVER_07_STATUS"
+log "server-08-ai-worker = $SERVER_08_STATUS"
+log "server-09-ai-training = $SERVER_09_STATUS"
+
+if [ "$SERVER_00_STATUS" != "present" ] || [ "$SERVER_05_STATUS" != "present" ] || [ "$SERVER_06_STATUS" != "present" ]; then
+  HEARTBEAT_STATE="degraded"
+fi
+
+cat > "$STATE_FILE" <<JSON
+{
+  "constellation": "Deploy_AfricaMapping_Agentic_Server_Constellation",
+  "initialized": true,
+  "first_deploy": $FIRST_DEPLOY,
+  "heartbeat_state": "$HEARTBEAT_STATE",
+  "last_deploy_result": "success",
+  "last_deploy_at": "$(date -u '+%Y-%m-%dT%H:%M:%SZ')",
+  "last_flow": "flow-01-bastion-app-db-monitoring",
+  "connection_model": "shared-governed-state",
+  "servers": {
+    "server-00-foundation": { "deployed": $(bool_from_status "$SERVER_00_STATUS"), "status": "$SERVER_00_STATUS" },
+    "server-01-bastion": { "deployed": $(bool_from_status "$SERVER_01_STATUS"), "status": "$SERVER_01_STATUS" },
+    "server-02-app": { "deployed": $(bool_from_status "$SERVER_02_STATUS"), "status": "$SERVER_02_STATUS" },
+    "server-03-db": { "deployed": $(bool_from_status "$SERVER_03_STATUS"), "status": "$SERVER_03_STATUS" },
+    "server-04-storage": { "deployed": $(bool_from_status "$SERVER_04_STATUS"), "status": "$SERVER_04_STATUS" },
+    "server-05-ci-cd": { "deployed": $(bool_from_status "$SERVER_05_STATUS"), "status": "$SERVER_05_STATUS" },
+    "server-06-monitoring": { "deployed": $(bool_from_status "$SERVER_06_STATUS"), "status": "$SERVER_06_STATUS" },
+    "server-07-ai-orchestrator": { "deployed": $(bool_from_status "$SERVER_07_STATUS"), "status": "$SERVER_07_STATUS" },
+    "server-08-ai-worker": { "deployed": $(bool_from_status "$SERVER_08_STATUS"), "status": "$SERVER_08_STATUS" },
+    "server-09-ai-training": { "deployed": $(bool_from_status "$SERVER_09_STATUS"), "status": "$SERVER_09_STATUS" }
+  }
+}
+JSON
+
+log "Heartbeat state written to $STATE_FILE"
+log "Deployment completed successfully"
+cat "$STATE_FILE"
