@@ -26,13 +26,18 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -p "${{ secrets.LINODE_PORT }}" -H "${{ secrets.LINODE_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Ensure remote base directories
+      - name: Upload deploy control scripts
         run: |
-          ssh -p "${{ secrets.LINODE_PORT }}" "${{ secrets.LINODE_USER }}@${{ secrets.LINODE_HOST }}" '
-            mkdir -p /opt/africamapping &&
-            mkdir -p /opt/africamapping/Deploy_Servers &&
-            sudo mkdir -p /var/log/africamapping
-          '
+          rsync -az \
+            -e "ssh -p ${{ secrets.LINODE_PORT }}" \
+            Deploy_Servers/server-05-ci-cd/pipelines/deploy/ \
+            "${{ secrets.LINODE_USER }}@${{ secrets.LINODE_HOST }}:/tmp/constellation-deploy/"
+
+      - name: Run remote bootstrap check
+        run: |
+          ssh -p "${{ secrets.LINODE_PORT }}" \
+            "${{ secrets.LINODE_USER }}@${{ secrets.LINODE_HOST }}" \
+            'bash /tmp/constellation-deploy/bootstrap-check.sh'
 
       - name: Upload constellation payload
         run: |
@@ -43,15 +48,18 @@ jobs:
 
       - name: Run remote deployment heartbeat
         run: |
-          ssh -p "${{ secrets.LINODE_PORT }}" "${{ secrets.LINODE_USER }}@${{ secrets.LINODE_HOST }}" \
+          ssh -p "${{ secrets.LINODE_PORT }}" \
+            "${{ secrets.LINODE_USER }}@${{ secrets.LINODE_HOST }}" \
             'bash /opt/africamapping/Deploy_Servers/server-05-ci-cd/pipelines/deploy/deploy-constellation.sh'
 
       - name: Show remote heartbeat state
         run: |
-          ssh -p "${{ secrets.LINODE_PORT }}" "${{ secrets.LINODE_USER }}@${{ secrets.LINODE_HOST }}" \
+          ssh -p "${{ secrets.LINODE_PORT }}" \
+            "${{ secrets.LINODE_USER }}@${{ secrets.LINODE_HOST }}" \
             'cat /opt/africamapping/deployment-state/constellation-status.json'
 
       - name: Show remote deploy log
         run: |
-          ssh -p "${{ secrets.LINODE_PORT }}" "${{ secrets.LINODE_USER }}@${{ secrets.LINODE_HOST }}" \
+          ssh -p "${{ secrets.LINODE_PORT }}" \
+            "${{ secrets.LINODE_USER }}@${{ secrets.LINODE_HOST }}" \
             'sudo cat /var/log/africamapping/deploy.log || true'
