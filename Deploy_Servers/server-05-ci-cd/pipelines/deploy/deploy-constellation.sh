@@ -127,6 +127,19 @@ bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/script
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/generate-sales-summary.sh
 log "Narrator mode summaries completed"
 
+log "Comparing preview versus actual"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/compare-preview-vs-actual.sh
+log "Preview versus actual comparison completed"
+
+log "Writing narrator audit entry"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/write-audit-entry.sh
+log "Narrator audit entry written"
+
+log "Generating narrator history summary"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/generate-history-summary.sh
+log "Narrator history summary generated"
+
+
 log "Deployment completed successfully"
 cat "$STATE_FILE"
 
