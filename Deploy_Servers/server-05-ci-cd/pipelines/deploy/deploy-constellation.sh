@@ -105,8 +105,12 @@ log  "Running governed flow-01"
 bash /opt/africamapping/Deploy_Servers/server-01-bastion/flows/generate-event.sh
 bash /opt/africamapping/Deploy_Servers/server-02-app/flows/process-event.sh
 bash /opt/africamapping/Deploy_Servers/server-06-monitoring/flows/observe-event.sh
+
 log "Governed flow-01 completed"
 
+log "Running narrator summary"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/narrate-state.sh
+log "Narrator summary completed"
 
 log "Deployment completed successfully"
 cat "$STATE_FILE"
