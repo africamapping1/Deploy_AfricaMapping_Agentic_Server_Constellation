@@ -143,6 +143,9 @@ log "Running strategist analysis"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/analyze-system.sh
 log "Strategist analysis completed"
 
+log "Running governor decision"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governor/scripts/decide-next-step.sh
+log "Governor decision completed"
 
 
 log "Deployment completed successfully"
