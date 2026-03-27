@@ -1,45 +1,43 @@
-# Narrator Reason Record
+# Heartbeat Reason Record
 
-## Item Name
-Heartbeat State
+## Intent
+Introduce heartbeat as the measurable living state of the constellation.
 
-## Item Type
-- platform
+## Classification
+platform-change
 
-## What Is It?
-Heartbeat is the measurable living state of the constellation.
+## Scope
+- server-00-foundation
+- server-05-ci-cd
+- server-06-monitoring
+- deployment-state
+- narrator summaries
 
-## Why Was It Introduced?
-To allow the constellation to know whether it has been initialized, deployed, and whether it is steady, degraded, failed, or evolving.
+## Expected Outcome
+- deployment writes a state file
+- the constellation records whether it is initialized
+- the system can report whether it is steady, degraded, failed, or evolving
+- narrator can interpret current system condition
 
-## Which Layer Does It Belong To?
-- foundation
-- ci-cd
-- monitoring
+## Why This Exists
+To prevent deployment from being stateless and to give the constellation a way to know and express its condition.
 
-## Is It Platform or Application?
-Platform
+## System Impact
+- enables deployment memory
+- supports monitoring interpretation
+- supports narrator summaries
+- creates a foundation for governed evolution
 
-## What Problem Does It Solve?
-It prevents the deployment from being stateless and gives the system a way to express its current condition.
+## Risk Level
+low
 
-## What Does It Affect?
-Deployment, monitoring, narration, and future governance behavior.
-
-## What Happens If It Is Not Added?
-The constellation would deploy blindly without memory of its condition.
-
-## Who Requested It?
-Foundational system design.
-
-## What Flow Does It Participate In?
-Deployment heartbeat and all later governed flows.
-
-## How Should It Be Observed Later?
-Through deployment-state, deploy logs, and narrator summaries.
+## Observability
+- /opt/africamapping/deployment-state/constellation-status.json
+- /var/log/africamapping/deploy.log
+- narrator summaries
 
 ## Status
-- implemented
+implemented
 
-## Final Narrator Note
+## Narrator Note
 Heartbeat turned deployment into living state.

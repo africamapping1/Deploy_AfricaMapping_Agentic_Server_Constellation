@@ -1,45 +1,44 @@
 # Narrator Reason Record
 
-## Item Name
-System Narrator
+## Intent
+Introduce the narrator as the explanation and reasoning layer of the constellation.
 
-## Item Type
-- narrator addition
+## Classification
+platform-change
 
-## What Is It?
-The explanation and reasoning layer of the constellation.
+## Scope
+- server-00-foundation
+- server-07-ai-orchestrator
+- product documentation
+- deployment interpretation
+- operator and sales summaries
 
-## Why Was It Introduced?
-To preserve why things were created, explain current state, and communicate the platform clearly across engineering, operations, and product contexts.
+## Expected Outcome
+- the system explains what happened
+- the system explains why components exist
+- the system can speak in internal, operator, and sales modes
+- reasoning is preserved across changes
 
-## Which Layer Does It Belong To?
-- foundation
-- orchestrator
-- product
+## Why This Exists
+To preserve design memory, explain runtime state, and communicate the platform clearly across engineering, operations, and product contexts.
 
-## Is It Platform or Application?
-Platform
+## System Impact
+- improves system understanding
+- improves onboarding
+- supports product presentation
+- supports governed change through reason records
 
-## What Problem Does It Solve?
-It prevents loss of design memory and allows the system to explain itself accurately.
+## Risk Level
+low
 
-## What Does It Affect?
-Documentation, operations, product communication, and future sales enablement.
-
-## What Happens If It Is Not Added?
-The constellation may remain functional but become harder to understand, explain, and evolve coherently.
-
-## Who Requested It?
-Platform creator and system evolution needs.
-
-## What Flow Does It Participate In?
-Deployment interpretation, flow interpretation, and future proposal review.
-
-## How Should It Be Observed Later?
-Through narrator reports, product voice docs, and reason records.
+## Observability
+- narrator reports
+- narrator generated summaries
+- narrator reason records
+- product narrator docs
 
 ## Status
-- implemented
+implemented
 
-## Final Narrator Note
+## Narrator Note
 The narrator preserves not only what was built, but why it was built.
