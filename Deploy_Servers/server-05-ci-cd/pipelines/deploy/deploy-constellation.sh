@@ -104,6 +104,12 @@ log "Enforcing narrator reason records"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/check-reason-records.sh
 log "Narrator reason enforcement passed"
 
+log "Generating deployment preview"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/generate-deployment-preview.sh
+log "Deployment preview generated"
+
+
+
 log  "Running governed flow-01"
 bash /opt/africamapping/Deploy_Servers/server-01-bastion/flows/generate-event.sh
 bash /opt/africamapping/Deploy_Servers/server-02-app/flows/process-event.sh
