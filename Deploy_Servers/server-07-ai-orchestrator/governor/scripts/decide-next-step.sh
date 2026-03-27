@@ -16,14 +16,12 @@ echo "" >> "$OUT_FILE"
 echo "## Decision" >> "$OUT_FILE"
 echo "" >> "$OUT_FILE"
 
-# Simple policy:
-# If strategist says "No immediate risks detected" → APPROVED
-# Otherwise → BLOCKED
-
 if grep -q "No immediate risks detected" "$STRATEGY_FILE"; then
   echo "APPROVED: System is stable. Expansion actions are allowed." >> "$OUT_FILE"
+  DECISION="APPROVED"
 else
   echo "BLOCKED: Risks detected. Resolve issues before proceeding." >> "$OUT_FILE"
+  DECISION="BLOCKED"
 fi
 
 echo "" >> "$OUT_FILE"
@@ -33,3 +31,8 @@ echo "Allow changes only when system risk is low and stability is confirmed." >>
 
 echo "[governor] decision written to $OUT_FILE"
 cat "$OUT_FILE"
+
+if [ "$DECISION" = "BLOCKED" ]; then
+  echo "[governor] enforcement: deployment blocked"
+  exit 1
+fi

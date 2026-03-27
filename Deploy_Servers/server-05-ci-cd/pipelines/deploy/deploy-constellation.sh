@@ -99,7 +99,7 @@ cat > "$STATE_FILE" <<JSON
 JSON
 
 log "Heartbeat state written to $STATE_FILE"  
-
+log "Governance Loop starting"
 log "Enforcing narrator reason records"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/check-reason-records.sh
 log "Narrator reason enforcement passed"
@@ -147,6 +147,12 @@ log "Running governor decision"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governor/scripts/decide-next-step.sh
 log "Governor decision completed"
 
+log "Reporting Governance Loop health"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governance-loop/report-health.sh
+log "Governance Loop health reported"
+
+
+log "Governance Loop completed"
 
 log "Deployment completed successfully"
 cat "$STATE_FILE"
