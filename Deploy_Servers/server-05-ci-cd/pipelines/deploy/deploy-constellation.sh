@@ -139,6 +139,11 @@ log "Generating narrator history summary"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/generate-history-summary.sh
 log "Narrator history summary generated"
 
+log "Running strategist analysis"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/analyze-system.sh
+log "Strategist analysis completed"
+
+
 
 log "Deployment completed successfully"
 cat "$STATE_FILE"
