@@ -1,47 +1,44 @@
-# Narrator Reason Record
+# Flow-01 Reason Record
 
-## Item Name
-Governed Flow 01
+## Intent
+Introduce the first governed flow across the constellation:
+bastion → app → monitoring.
 
-## Item Type
-- flow
+## Classification
+flow-change
 
-## What Is It?
-The first governed live flow across the constellation:
-server-01-bastion -> server-02-app -> server-06-monitoring
+## Scope
+- server-01-bastion
+- server-02-app
+- server-06-monitoring
+- server-07-ai-orchestrator
 
-## Why Was It Introduced?
-To prove that the constellation can do more than deploy. It can move information through roles and produce observable output.
+## Expected Outcome
+- event is created by bastion
+- event is processed by app
+- event is logged by monitoring
+- narrator produces summaries
 
-## Which Layer Does It Belong To?
-- bastion
-- app
-- monitoring
-- orchestrator
+## Why This Exists
+To prove that the constellation can move information through roles and produce observable output.
 
-## Is It Platform or Application?
-Platform
+## System Impact
+- enables runtime flow execution
+- activates monitoring layer
+- feeds narrator summaries
+- establishes baseline for orchestration
 
-## What Problem Does It Solve?
-It demonstrates real motion through the constellation and proves the system can act.
+## Risk Level
+low
 
-## What Does It Affect?
-Flow runtime, monitoring, narrator summaries, and future orchestration.
-
-## What Happens If It Is Not Added?
-The constellation remains a deployment-only system without active routed behavior.
-
-## Who Requested It?
-System evolution after first heartbeat.
-
-## What Flow Does It Participate In?
-flow-01-bastion-app-db-monitoring as the first live runtime slice.
-
-## How Should It Be Observed Later?
-Through event.txt, processed.txt, flow.log, and narrator summaries.
+## Observability
+- /opt/africamapping/flows/flow-01/event.txt
+- /opt/africamapping/flows/flow-01/processed.txt
+- /var/log/africamapping/flow.log
+- narrator summaries
 
 ## Status
-- implemented
+implemented
 
-## Final Narrator Note
-Flow-01 is the first proof that the constellation can act.
+## Narrator Note
+Flow-01 is the first proof that the constellation can act, not just deploy.
