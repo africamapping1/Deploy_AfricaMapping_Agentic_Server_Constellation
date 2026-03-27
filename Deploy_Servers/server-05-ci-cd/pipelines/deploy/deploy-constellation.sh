@@ -100,6 +100,9 @@ JSON
 
 log "Heartbeat state written to $STATE_FILE"  
 
+log "Enforcing narrator reason records"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/check-reason-records.sh
+log "Narrator reason enforcement passed"
 
 log  "Running governed flow-01"
 bash /opt/africamapping/Deploy_Servers/server-01-bastion/flows/generate-event.sh
