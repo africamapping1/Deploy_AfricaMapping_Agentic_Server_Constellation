@@ -112,6 +112,12 @@ log "Running narrator summary"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/narrate-state.sh
 log "Narrator summary completed"
 
+log "Generating narrator mode summaries"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/generate-internal-summary.sh
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/generate-operator-summary.sh
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/generate-sales-summary.sh
+log "Narrator mode summaries completed"
+
 log "Deployment completed successfully"
 cat "$STATE_FILE"
 
