@@ -56,6 +56,8 @@ SERVER_06_STATUS=$(server_status "server-06-monitoring")
 SERVER_07_STATUS=$(server_status "server-07-ai-orchestrator")
 SERVER_08_STATUS=$(server_status "server-08-ai-worker")
 SERVER_09_STATUS=$(server_status "server-09-ai-training")
+SERVER_10_STATUS=$(server_status "server-10-applications")
+
 
 log "Detected constellation server presence"
 log "server-00-foundation = $SERVER_00_STATUS"
@@ -68,6 +70,7 @@ log "server-06-monitoring = $SERVER_06_STATUS"
 log "server-07-ai-orchestrator = $SERVER_07_STATUS"
 log "server-08-ai-worker = $SERVER_08_STATUS"
 log "server-09-ai-training = $SERVER_09_STATUS"
+log "server-10-applications = $SERVER_10_STATUS"
 
 if [ "$SERVER_00_STATUS" != "present" ] || [ "$SERVER_05_STATUS" != "present" ] || [ "$SERVER_06_STATUS" != "present" ]; then
   HEARTBEAT_STATE="degraded"
@@ -93,7 +96,10 @@ cat > "$STATE_FILE" <<JSON
     "server-06-monitoring": { "deployed": $(bool_from_status "$SERVER_06_STATUS"), "status": "$SERVER_06_STATUS" },
     "server-07-ai-orchestrator": { "deployed": $(bool_from_status "$SERVER_07_STATUS"), "status": "$SERVER_07_STATUS" },
     "server-08-ai-worker": { "deployed": $(bool_from_status "$SERVER_08_STATUS"), "status": "$SERVER_08_STATUS" },
-    "server-09-ai-training": { "deployed": $(bool_from_status "$SERVER_09_STATUS"), "status": "$SERVER_09_STATUS" }
+    "server-09-ai-training": { "deployed": $(bool_from_status "$SERVER_09_STATUS"), "status": "$SERVER_09_STATUS" },
+    "server-10-applications": { "deployed": $(bool_from_status "$SERVER_10_STATUS"), "status": "$SERVER_10_STATUS" }
+
+}
   }
 }
 JSON
