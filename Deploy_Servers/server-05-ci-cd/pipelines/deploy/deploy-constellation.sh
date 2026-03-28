@@ -130,6 +130,12 @@ bash /opt/africamapping/Deploy_Servers/server-03-db/ops/store-africamapping-acti
 bash /opt/africamapping/Deploy_Servers/server-06-monitoring/flows/observe-africamapping-activity.sh
 log "Flow-02 AfricaMapping activity intake completed"
 
+log "Running Flow-03 project lifecycle"
+bash /opt/africamapping/Deploy_Servers/server-01-bastion/flows/receive-project.sh
+bash /opt/africamapping/Deploy_Servers/server-02-app/flows/process-project.sh
+bash /opt/africamapping/Deploy_Servers/server-03-db/ops/store-project.sh
+bash /opt/africamapping/Deploy_Servers/server-06-monitoring/flows/observe-project.sh
+log "Flow-03 project lifecycle completed"
 
 log "Running narrator summary"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/narrate-state.sh
