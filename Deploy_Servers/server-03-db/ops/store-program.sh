@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+BASE="/opt/africamapping"
+FLOW_DIR="$BASE/flows/flow-04"
+DB_DIR="$BASE/db/africamapping/programs"
+DB_FILE="$DB_DIR/programs.log"
+
+mkdir -p "$DB_DIR"
+
+if [ ! -f "$FLOW_DIR/program-processed.txt" ]; then
+  echo "[db] no processed program found"
+  exit 0
+fi
+
+echo "-----" >> "$DB_FILE"
+cat "$FLOW_DIR/program-processed.txt" >> "$DB_FILE"
+echo "stored_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$DB_FILE"
+
+echo "[db] program stored"

@@ -1,0 +1,10 @@
+program_id=program-001
+business=AfricaMapping
+name=National Mapping Initiative
+status=intake
+priority=high
+created_at=2026-03-28T00:00:00Z
+requested_by=africamapping
+
+projects:
+- project-001
