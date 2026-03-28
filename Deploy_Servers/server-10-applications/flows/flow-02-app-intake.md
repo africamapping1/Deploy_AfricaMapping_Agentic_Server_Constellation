@@ -1,18 +1,22 @@
-# Flow-02 — Application Intake
+# Flow-02 — AfricaMapping Activity Intake
 
 ## Purpose
 
-Flow-02 introduces the application layer into the constellation.
+Flow-02 introduces the first application-driven business flow into the constellation.
 
-## Basic Path
+## Path
 
-business need
-→ application definition
-→ interface mapping
-→ governance review
-→ application admission
-→ operational delivery
+AfricaMapping activity intake
+→ server-01-bastion receives
+→ server-02-app processes
+→ server-03-db stores
+→ server-06-monitoring observes
+→ Governance Loop evaluates overall system state
+
+## Business Meaning
+
+This flow proves that a business consumer can send meaningful activity into the platform and receive governed operational handling.
 
 ## First Use Case
 
-AfricaMapping becomes the first business consumer of the application layer.
+AfricaMapping submits a business activity request for operational processing.

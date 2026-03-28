@@ -1,0 +1,7 @@
+activity_id=activity-001
+business=AfricaMapping
+type=project-update
+title=Prepare community mapping launch update
+requested_by=africamapping
+priority=high
+created_at=2026-03-27T00:00:00Z

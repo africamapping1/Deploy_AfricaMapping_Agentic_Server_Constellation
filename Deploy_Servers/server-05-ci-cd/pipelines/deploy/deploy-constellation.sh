@@ -114,8 +114,16 @@ log  "Running governed flow-01"
 bash /opt/africamapping/Deploy_Servers/server-01-bastion/flows/generate-event.sh
 bash /opt/africamapping/Deploy_Servers/server-02-app/flows/process-event.sh
 bash /opt/africamapping/Deploy_Servers/server-06-monitoring/flows/observe-event.sh
-
 log "Governed flow-01 completed"
+
+
+log "Running Flow-02 AfricaMapping activity intake"
+bash /opt/africamapping/Deploy_Servers/server-01-bastion/flows/receive-africamapping-activity.sh
+bash /opt/africamapping/Deploy_Servers/server-02-app/flows/process-africamapping-activity.sh
+bash /opt/africamapping/Deploy_Servers/server-03-db/ops/store-africamapping-activity.sh
+bash /opt/africamapping/Deploy_Servers/server-06-monitoring/flows/observe-africamapping-activity.sh
+log "Flow-02 AfricaMapping activity intake completed"
+
 
 log "Running narrator summary"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/narrate-state.sh
