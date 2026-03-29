@@ -16,24 +16,28 @@ echo "" >> "$OUTPUT"
 echo "## Active Projects" >> "$OUTPUT"
 echo "" >> "$OUTPUT"
 
-PROJECT_FILE="/opt/africamapping/flows/flow-03/project-processed.txt"
+PROJECT_FILES=$(find /opt/africamapping/flows/flow-03 -maxdepth 1 -type f -name 'project-*-processed.txt' | sort)
 
-if [ -f "$PROJECT_FILE" ]; then
-  echo "### Project Details" >> "$OUTPUT"
-  echo "" >> "$OUTPUT"
+if [ -n "$PROJECT_FILES" ]; then
+  while IFS= read -r PROJECT_FILE; do
+    [ -n "$PROJECT_FILE" ] || continue
 
-  PROJECT_NAME=$(grep "^name=" "$PROJECT_FILE" | cut -d '=' -f2-)
-  PROJECT_STATUS=$(grep "^status=" "$PROJECT_FILE" | tail -n 1 | cut -d '=' -f2-)
-  PROJECT_UPDATED=$(grep "^processed_at=" "$PROJECT_FILE" | tail -n 1 | cut -d '=' -f2-)
+    PROJECT_NAME=$(grep "^name=" "$PROJECT_FILE" | cut -d '=' -f2-)
+    PROJECT_STATUS=$(grep "^status=" "$PROJECT_FILE" | tail -n 1 | cut -d '=' -f2-)
+    PROJECT_UPDATED=$(grep "^processed_at=" "$PROJECT_FILE" | tail -n 1 | cut -d '=' -f2-)
+    PROJECT_ID=$(grep "^project_id=" "$PROJECT_FILE" | cut -d '=' -f2-)
 
-  echo "- Name: $PROJECT_NAME" >> "$OUTPUT"
-  echo "- Status: $PROJECT_STATUS" >> "$OUTPUT"
-  echo "- Last Updated: $PROJECT_UPDATED" >> "$OUTPUT"
+    echo "### $PROJECT_ID" >> "$OUTPUT"
+    echo "" >> "$OUTPUT"
+    echo "- Name: $PROJECT_NAME" >> "$OUTPUT"
+    echo "- Status: $PROJECT_STATUS" >> "$OUTPUT"
+    echo "- Last Updated: $PROJECT_UPDATED" >> "$OUTPUT"
+    echo "" >> "$OUTPUT"
+  done <<< "$PROJECT_FILES"
 else
   echo "No active project data found." >> "$OUTPUT"
+  echo "" >> "$OUTPUT"
 fi
-
-echo "" >> "$OUTPUT"
 
 ########################################
 # PROGRAMS

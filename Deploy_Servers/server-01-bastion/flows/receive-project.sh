@@ -14,8 +14,15 @@ if [ -z "${LATEST_FILE:-}" ]; then
   exit 0
 fi
 
+BASENAME="$(basename "$LATEST_FILE")"
+
 cp "$LATEST_FILE" "$FLOW_DIR/project.txt"
+cp "$LATEST_FILE" "$FLOW_DIR/$BASENAME"
+
 echo "received_by=server-01-bastion" >> "$FLOW_DIR/project.txt"
 echo "received_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$FLOW_DIR/project.txt"
 
-echo "[bastion] project received"
+echo "received_by=server-01-bastion" >> "$FLOW_DIR/$BASENAME"
+echo "received_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$FLOW_DIR/$BASENAME"
+
+echo "[bastion] project received: $BASENAME"

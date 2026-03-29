@@ -8,3 +8,4 @@ requested_by=africamapping
 
 projects:
 - project-001
+- project-002
