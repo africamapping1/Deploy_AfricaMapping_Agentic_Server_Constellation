@@ -140,6 +140,12 @@ bash /opt/africamapping/Deploy_Servers/server-03-db/ops/store-program.sh
 bash /opt/africamapping/Deploy_Servers/server-06-monitoring/flows/observe-program.sh
 log "Flow-04 program coordination completed"
 
+
+log "Validating program-project relationships"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governance-loop/validate-relationships.sh
+log "Relationship validation completed"
+
+
 log "Running Flow-05 infrastructure health"
 bash /opt/africamapping/Deploy_Servers/server-06-monitoring/flows/observe-infrastructure.sh
 log "Flow-05 infrastructure health completed"
