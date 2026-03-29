@@ -85,5 +85,17 @@ else
   echo "No flow log found." >> "$REPORT_FILE"
 fi
 
+INFRA_FILE="/opt/africamapping/infrastructure/latest-health.txt"
+
+echo "" >> "$REPORT_FILE"
+echo "## Infrastructure Health" >> "$REPORT_FILE"
+echo "" >> "$REPORT_FILE"
+
+if [ -f "$INFRA_FILE" ]; then
+  cat "$INFRA_FILE" >> "$REPORT_FILE"
+else
+  echo "No infrastructure health data available." >> "$REPORT_FILE"
+fi
+
 echo "[narrator] summary written to $REPORT_FILE"
 cat "$REPORT_FILE"

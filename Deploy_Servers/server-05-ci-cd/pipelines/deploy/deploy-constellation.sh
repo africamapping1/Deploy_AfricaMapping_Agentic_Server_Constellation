@@ -58,7 +58,6 @@ SERVER_08_STATUS=$(server_status "server-08-ai-worker")
 SERVER_09_STATUS=$(server_status "server-09-ai-training")
 SERVER_10_STATUS=$(server_status "server-10-applications")
 
-
 log "Detected constellation server presence"
 log "server-00-foundation = $SERVER_00_STATUS"
 log "server-01-bastion = $SERVER_01_STATUS"
@@ -84,7 +83,7 @@ cat > "$STATE_FILE" <<JSON
   "heartbeat_state": "$HEARTBEAT_STATE",
   "last_deploy_result": "success",
   "last_deploy_at": "$(date -u '+%Y-%m-%dT%H:%M:%SZ')",
-  "last_flow": "flow-01-bastion-app-db-monitoring",
+  "last_flow": "flow-05-infrastructure-health",
   "connection_model": "shared-governed-state",
   "servers": {
     "server-00-foundation": { "deployed": $(bool_from_status "$SERVER_00_STATUS"), "status": "$SERVER_00_STATUS" },
@@ -98,14 +97,14 @@ cat > "$STATE_FILE" <<JSON
     "server-08-ai-worker": { "deployed": $(bool_from_status "$SERVER_08_STATUS"), "status": "$SERVER_08_STATUS" },
     "server-09-ai-training": { "deployed": $(bool_from_status "$SERVER_09_STATUS"), "status": "$SERVER_09_STATUS" },
     "server-10-applications": { "deployed": $(bool_from_status "$SERVER_10_STATUS"), "status": "$SERVER_10_STATUS" }
-
-}
   }
 }
 JSON
 
-log "Heartbeat state written to $STATE_FILE"  
+log "Heartbeat state written to $STATE_FILE"
+
 log "Governance Loop starting"
+
 log "Enforcing narrator reason records"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/check-reason-records.sh
 log "Narrator reason enforcement passed"
@@ -114,14 +113,11 @@ log "Generating deployment preview"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/generate-deployment-preview.sh
 log "Deployment preview generated"
 
-
-
-log  "Running governed flow-01"
+log "Running governed flow-01"
 bash /opt/africamapping/Deploy_Servers/server-01-bastion/flows/generate-event.sh
 bash /opt/africamapping/Deploy_Servers/server-02-app/flows/process-event.sh
 bash /opt/africamapping/Deploy_Servers/server-06-monitoring/flows/observe-event.sh
 log "Governed flow-01 completed"
-
 
 log "Running Flow-02 AfricaMapping activity intake"
 bash /opt/africamapping/Deploy_Servers/server-01-bastion/flows/receive-africamapping-activity.sh
@@ -174,6 +170,10 @@ log "Running strategist analysis"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/analyze-system.sh
 log "Strategist analysis completed"
 
+log "Generating business summary"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/generate-business-summary.sh
+log "Business summary generated"
+
 log "Running governor decision"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governor/scripts/decide-next-step.sh
 log "Governor decision completed"
@@ -182,9 +182,7 @@ log "Reporting Governance Loop health"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governance-loop/report-health.sh
 log "Governance Loop health reported"
 
-
 log "Governance Loop completed"
 
 log "Deployment completed successfully"
 cat "$STATE_FILE"
-
