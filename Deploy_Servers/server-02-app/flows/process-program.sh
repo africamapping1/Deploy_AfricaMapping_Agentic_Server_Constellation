@@ -1,23 +1,20 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/bash
 
-BASE="/opt/africamapping"
-FLOW_DIR="$BASE/flows/flow-04"
-ACTIVE_DIR="$BASE/Deploy_Servers/server-10-applications/apps/africamapping/programs/active"
+FLOW_DIR="/opt/africamapping/flows/flow-04"
+INTAKE_FILE="$FLOW_DIR/program.txt"
+PROCESSED_FILE="$FLOW_DIR/program-processed.txt"
 
-mkdir -p "$ACTIVE_DIR"
-
-if [ ! -f "$FLOW_DIR/program.txt" ]; then
-  echo "[app] no program found"
+# Skip if already processed
+if [ -f "$PROCESSED_FILE" ]; then
+  echo "[app] program already processed, skipping"
   exit 0
 fi
 
-cp "$FLOW_DIR/program.txt" "$FLOW_DIR/program-processed.txt"
-
-echo "processed_by=server-02-app" >> "$FLOW_DIR/program-processed.txt"
-echo "processed_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$FLOW_DIR/program-processed.txt"
-echo "status=active" >> "$FLOW_DIR/program-processed.txt"
-
-cp "$FLOW_DIR/program-processed.txt" "$ACTIVE_DIR/program-001.txt"
-
-echo "[app] program processed and activated"
+if [ -f "$INTAKE_FILE" ]; then
+  cp "$INTAKE_FILE" "$PROCESSED_FILE"
+  echo "status=active" >> "$PROCESSED_FILE"
+  echo "processed_at=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> "$PROCESSED_FILE"
+  echo "[app] program processed"
+else
+  echo "[app] no program intake found"
+fi
