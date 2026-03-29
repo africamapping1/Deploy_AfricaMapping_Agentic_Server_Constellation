@@ -24,9 +24,9 @@ if [ -f "$PROJECT_FILE" ]; then
   echo "" >> "$OUTPUT"
 
   PROJECT_NAME=$(grep "name=" "$PROJECT_FILE" | cut -d '=' -f2)
-  PROJECT_STATUS=$(grep "status=" "$PROJECT_FILE" | tail -n 1 | cut -d '=' -f2)
+  PROJECT_STATUS=$(grep "^status=" "$PROJECT_FILE" | tail -n 1 | cut -d '=' -f2)
   PROJECT_UPDATED=$(grep "processed_at=" "$PROJECT_FILE" | tail -n 1 | cut -d '=' -f2)
-
+ 
   echo "- Name: $PROJECT_NAME" >> "$OUTPUT"
   echo "- Status: $PROJECT_STATUS" >> "$OUTPUT"
   echo "- Last Updated: $PROJECT_UPDATED" >> "$OUTPUT"
@@ -50,7 +50,7 @@ if [ -f "$PROGRAM_FILE" ]; then
   echo "" >> "$OUTPUT"
 
   PROGRAM_NAME=$(grep "name=" "$PROGRAM_FILE" | cut -d '=' -f2)
-  PROGRAM_STATUS=$(grep "status=" "$PROGRAM_FILE" | tail -n 1 | cut -d '=' -f2)
+  PROGRAM_STATUS=$(grep "^status=" "$PROGRAM_FILE" | tail -n 1 | cut -d '=' -f2)
   PROGRAM_UPDATED=$(grep "processed_at=" "$PROGRAM_FILE" | tail -n 1 | cut -d '=' -f2)
 
   echo "- Name: $PROGRAM_NAME" >> "$OUTPUT"
@@ -74,7 +74,7 @@ ACTIVITY_FILE="/opt/africamapping/flows/flow-02/activity.txt"
 if [ -f "$ACTIVITY_FILE" ]; then
   ACTIVITY_TITLE=$(grep "title=" "$ACTIVITY_FILE" | cut -d '=' -f2)
   ACTIVITY_TYPE=$(grep "type=" "$ACTIVITY_FILE" | cut -d '=' -f2)
-  ACTIVITY_STATUS=$(grep "status=" "$ACTIVITY_FILE" | tail -n 1 | cut -d '=' -f2)
+  ACTIVITY_STATUS=$(grep "^status=" "$ACTIVITY_FILE" | tail -n 1 | cut -d '=' -f2)
 
   echo "- Title: $ACTIVITY_TITLE" >> "$OUTPUT"
   echo "- Type: $ACTIVITY_TYPE" >> "$OUTPUT"
