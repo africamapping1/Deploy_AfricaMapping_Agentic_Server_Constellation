@@ -184,6 +184,11 @@ log "Running governor decision"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governor/scripts/decide-next-step.sh
 log "Governor decision completed"
 
+if ! grep -q "APPROVED: System is stable. Expansion actions are allowed." /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governor/decisions/latest-decision.md; then
+  log "Governor enforcement: deployment blocked by governor decision"
+  exit 1
+fi
+
 log "Generating dashboard JSON"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/generate-dashboard-json.sh
 log "Dashboard JSON generated"
