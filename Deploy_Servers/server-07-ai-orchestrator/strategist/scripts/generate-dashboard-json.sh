@@ -38,7 +38,21 @@ if [ -f "$GOV_FILE" ]; then
 fi
 
 restart_required="unknown"
-gpu_status="unknown"
+gpu_status="unknown
+"
+
+PROJECT_COUNT=$(find "$PROJECT_DIR" -maxdepth 1 -type f -name 'project-*-processed.txt' | wc -l | tr -d ' ')
+PROGRAM_COUNT=0
+if [ -f "$PROGRAM_FILE" ]; then
+  PROGRAM_COUNT=1
+fi
+
+ALERTS_JSON=""
+if [ "$validation_result" != "PASS" ]; then
+  ALERTS_JSON="\"Program-project relationship issue detected\""
+fi
+
+
 if [ -f "$INFRA_FILE" ]; then
   if grep -q "System restart is required." "$INFRA_FILE"; then
     restart_required="true"
@@ -105,6 +119,13 @@ cat > "$OUT_FILE" <<EOFJSON
     "heartbeat_state": "$heartbeat_state",
     "governance_health": "$governance_health"
   },
+
+  "metrics": {
+    "projects": $PROJECT_COUNT,
+    "programs": $PROGRAM_COUNT
+  },
+  "alerts": [${ALERTS_JSON}],
+
   "projects": [${projects_json}
   ],
   "programs": [
