@@ -35,12 +35,13 @@ else
 fi
 
 echo "" >> "$OUT_FILE"
-echo "## Suggested Next Steps" >> "$OUT_FILE"
-echo "" >> "$OUT_FILE"
+echo "## Suggested Next Steps" >> "$OUTPUT"
+echo "" >> "$OUTPUT"
 
-echo "- Introduce flow-02 for extended system behavior" >> "$OUT_FILE"
-echo "- Expand monitoring depth" >> "$OUT_FILE"
-echo "- Validate system under increased load" >> "$OUT_FILE"
+echo "- Expand program-to-project relationships (support multiple projects per program)" >> "$OUTPUT"
+echo "- Introduce project lifecycle transitions (active → completed → archived)" >> "$OUTPUT"
+echo "- Enhance dashboard for operational visibility and alerts" >> "$OUTPUT"
+echo "- Introduce system load testing and scaling validation" >> "$OUTPUT"
 
 echo "" >> "$OUT_FILE"
 echo "## Strategic Note" >> "$OUT_FILE"
