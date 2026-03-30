@@ -184,6 +184,10 @@ log "Running governor decision"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governor/scripts/decide-next-step.sh
 log "Governor decision completed"
 
+log "Generating dashboard JSON"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/generate-dashboard-json.sh
+log "Dashboard JSON generated"
+
 log "Reporting Governance Loop health"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governance-loop/report-health.sh
 log "Governance Loop health reported"
