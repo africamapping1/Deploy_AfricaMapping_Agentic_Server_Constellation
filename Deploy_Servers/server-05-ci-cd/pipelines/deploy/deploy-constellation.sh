@@ -109,6 +109,10 @@ log "Enforcing narrator reason records"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/check-reason-records.sh
 log "Narrator reason enforcement passed"
 
+log "Running governor enforcement"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governor/enforce-rules.sh || exit 1
+log "Governor enforcement passed"
+
 log "Generating deployment preview"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/generate-deployment-preview.sh
 log "Deployment preview generated"
