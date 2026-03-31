@@ -150,6 +150,10 @@ log "Running Flow-05 infrastructure health"
 bash /opt/africamapping/Deploy_Servers/server-06-monitoring/flows/observe-infrastructure.sh
 log "Flow-05 infrastructure health completed"
 
+log "Running Flow-06 lifecycle progression"
+bash /opt/africamapping/Deploy_Servers/server-02-app/flows/process-lifecycle.sh
+log "Flow-06 lifecycle progression completed"
+
 log "Running narrator summary"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/narrate-state.sh
 log "Narrator summary completed"
