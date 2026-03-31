@@ -32,3 +32,21 @@ echo "" >> "$OUTPUT"
 echo "## Strategic Note" >> "$OUTPUT"
 echo "" >> "$OUTPUT"
 echo "The constellation is evolving into a fully governed operational platform with active business coordination and infrastructure awareness." >> "$OUTPUT"
+
+echo "" >> "$OUTPUT"
+echo "## Strategic Signals" >> "$OUTPUT"
+echo "" >> "$OUTPUT"
+
+# Detect archived-heavy system (example signal)
+ARCHIVED_COUNT=$(grep -r "status=archived" /opt/africamapping/flows 2>/dev/null | wc -l)
+
+if [ "$ARCHIVED_COUNT" -gt 5 ]; then
+  echo "- High number of archived entities detected → system may be cycling too fast" >> "$OUTPUT"
+fi
+
+# Detect no active projects
+ACTIVE_COUNT=$(grep -r "status=active" /opt/africamapping/flows 2>/dev/null | wc -l)
+
+if [ "$ACTIVE_COUNT" -eq 0 ]; then
+  echo "- No active work detected → system idle risk" >> "$OUTPUT"
+fi
