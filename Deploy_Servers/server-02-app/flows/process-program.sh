@@ -1,20 +1,35 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-FLOW_DIR="/opt/africamapping/flows/flow-04"
-INTAKE_FILE="$FLOW_DIR/program.txt"
-PROCESSED_FILE="$FLOW_DIR/program-processed.txt"
+BASE="/opt/africamapping"
+TENANTS_DIR="$BASE/tenants"
 
-# Skip if already processed
-if [ -f "$PROCESSED_FILE" ]; then
-  echo "[app] program already processed, skipping"
-  exit 0
-fi
+FOUND=0
 
-if [ -f "$INTAKE_FILE" ]; then
-  cp "$INTAKE_FILE" "$PROCESSED_FILE"
-  echo "status=active" >> "$PROCESSED_FILE"
-  echo "processed_at=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> "$PROCESSED_FILE"
-  echo "[app] program processed"
-else
-  echo "[app] no program intake found"
+for TENANT_PATH in "$TENANTS_DIR"/*; do
+  [ -d "$TENANT_PATH" ] || continue
+
+  FLOW_DIR="$TENANT_PATH/flows/flow-04"
+  INPUT_FILE="$FLOW_DIR/program.txt"
+  OUTPUT_FILE="$FLOW_DIR/program-processed.txt"
+
+  if [ -f "$INPUT_FILE" ]; then
+    FOUND=1
+
+    if [ -f "$OUTPUT_FILE" ]; then
+      echo "[app] $(basename "$TENANT_PATH") program already processed, skipping"
+      continue
+    fi
+
+    cp "$INPUT_FILE" "$OUTPUT_FILE"
+    echo "processed_by=server-02-app" >> "$OUTPUT_FILE"
+    echo "processed_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$OUTPUT_FILE"
+    echo "status=active" >> "$OUTPUT_FILE"
+
+    echo "[app] $(basename "$TENANT_PATH") program processed"
+  fi
+done
+
+if [ "$FOUND" -eq 0 ]; then
+  echo "[app] no tenant program intake found"
 fi
