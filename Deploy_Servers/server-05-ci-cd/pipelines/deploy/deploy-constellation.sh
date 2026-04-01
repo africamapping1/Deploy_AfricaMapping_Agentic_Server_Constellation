@@ -189,10 +189,10 @@ bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scri
 log "Business summary generated"
 
 log "Running governor decision"
-bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governor/scripts/decide-next-step.sh
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governor/scripts/make-decision.sh
 log "Governor decision completed"
 
-if ! grep -q "APPROVED: System is stable. Expansion actions are allowed." /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governor/decisions/latest-decision.md; then
+if ! grep -q "APPROVED: Active work detected. System operating normally." /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governor/decisions/latest-decision.md; then
   log "Governor enforcement: deployment blocked by governor decision"
   exit 1
 fi
