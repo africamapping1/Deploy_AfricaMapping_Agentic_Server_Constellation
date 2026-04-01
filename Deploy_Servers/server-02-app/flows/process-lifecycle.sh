@@ -1,28 +1,42 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-FLOW_DIR="/opt/africamapping/flows"
+BASE="/opt/africamapping/tenants"
 
 echo "[flow-06] Starting lifecycle processing"
 
-for TYPE in flow-02 flow-03 flow-04; do
-  DIR="$FLOW_DIR/$TYPE"
+for TENANT in "$BASE"/*; do
+  [ -d "$TENANT" ] || continue
 
-  if [ -d "$DIR" ]; then
-    for FILE in "$DIR"/*.txt; do
-      [ -e "$FILE" ] || continue
+  FLOW_DIR="$TENANT/flows/flow-03"
 
-      STATUS=$(grep "status=" "$FILE" | tail -n 1 | cut -d '=' -f2)
+  for FILE in "$FLOW_DIR"/*-processed.txt; do
+    [ -f "$FILE" ] || continue
 
-      if [ "$STATUS" = "active" ]; then
-        echo "[flow-06] progressing $FILE to completed"
-        echo "status=completed" >> "$FILE"
-      elif [ "$STATUS" = "completed" ]; then
-        echo "[flow-06] progressing $FILE to archived"
-        echo "status=archived" >> "$FILE"
-      fi
+    CURRENT_STATUS=$(grep '^status=' "$FILE" | tail -n 1 | cut -d '=' -f2)
 
-    done
-  fi
+    case "$CURRENT_STATUS" in
+      intake)
+        echo "status=active" >> "$FILE"
+        echo "[flow-06] $(basename "$FILE") moved intake → active"
+        ;;
+      
+      active)
+        # DO NOT AUTO COMPLETE
+        echo "[flow-06] $(basename "$FILE") remains active"
+        ;;
+      
+      completed)
+        # DO NOT AUTO ARCHIVE
+        echo "[flow-06] $(basename "$FILE") remains completed"
+        ;;
+      
+      *)
+        echo "[flow-06] $(basename "$FILE") no change"
+        ;;
+    esac
+
+  done
 done
 
 echo "[flow-06] Lifecycle processing completed"
