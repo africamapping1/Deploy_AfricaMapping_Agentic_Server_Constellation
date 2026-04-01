@@ -2,20 +2,21 @@
 set -euo pipefail
 
 BASE="/opt/africamapping"
-SRC_DIR="$BASE/Deploy_Servers/server-10-applications/apps/africamapping/activities/intake"
-FLOW_DIR="$BASE/flows/flow-02"
+INPUT_FILE="$BASE/Deploy_Servers/server-10-applications/apps/africamapping/activities/intake/activity-001.txt"
+
+BUSINESS=$(grep '^business=' "$INPUT_FILE" | head -n 1 | cut -d '=' -f2- | tr '[:upper:]' '[:lower:]')
+if [ -z "${BUSINESS:-}" ]; then
+  BUSINESS="unknown"
+fi
+
+TENANT_DIR="$BASE/tenants/$BUSINESS"
+FLOW_DIR="$TENANT_DIR/flows/flow-02"
 
 mkdir -p "$FLOW_DIR"
 
-LATEST_FILE="$(find "$SRC_DIR" -maxdepth 1 -type f -name '*.txt' | sort | tail -n 1 || true)"
+cp "$INPUT_FILE" "$FLOW_DIR/activity.txt"
 
-if [ -z "${LATEST_FILE:-}" ]; then
-  echo "[bastion] no AfricaMapping activity intake found"
-  exit 0
-fi
-
-cp "$LATEST_FILE" "$FLOW_DIR/activity.txt"
 echo "received_by=server-01-bastion" >> "$FLOW_DIR/activity.txt"
 echo "received_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$FLOW_DIR/activity.txt"
 
-echo "[bastion] AfricaMapping activity received"
+echo "[bastion] ${BUSINESS} activity received"
