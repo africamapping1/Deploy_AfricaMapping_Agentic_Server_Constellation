@@ -2,21 +2,29 @@
 set -euo pipefail
 
 BASE="/opt/africamapping"
-INPUT_FILE="$BASE/Deploy_Servers/server-10-applications/apps/africamapping/activities/intake/activity-001.txt"
+APPS_DIR="$BASE/Deploy_Servers/server-10-applications/apps"
 
-BUSINESS=$(grep '^business=' "$INPUT_FILE" | head -n 1 | cut -d '=' -f2- | tr '[:upper:]' '[:lower:]')
-if [ -z "${BUSINESS:-}" ]; then
-  BUSINESS="unknown"
-fi
+for APP in "$APPS_DIR"/*; do
+  [ -d "$APP" ] || continue
 
-TENANT_DIR="$BASE/tenants/$BUSINESS"
-FLOW_DIR="$TENANT_DIR/flows/flow-02"
+  for INPUT_FILE in "$APP/activities/intake/"*.txt; do
+    [ -f "$INPUT_FILE" ] || continue
 
-mkdir -p "$FLOW_DIR"
+    BUSINESS=$(grep '^business=' "$INPUT_FILE" | head -n 1 | cut -d '=' -f2- | tr '[:upper:]' '[:lower:]')
+    if [ -z "${BUSINESS:-}" ]; then
+      BUSINESS="unknown"
+    fi
 
-cp "$INPUT_FILE" "$FLOW_DIR/activity.txt"
+    TENANT_DIR="$BASE/tenants/$BUSINESS"
+    FLOW_DIR="$TENANT_DIR/flows/flow-02"
 
-echo "received_by=server-01-bastion" >> "$FLOW_DIR/activity.txt"
-echo "received_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$FLOW_DIR/activity.txt"
+    mkdir -p "$FLOW_DIR"
 
-echo "[bastion] ${BUSINESS} activity received"
+    cp "$INPUT_FILE" "$FLOW_DIR/activity.txt"
+
+    echo "received_by=server-01-bastion" >> "$FLOW_DIR/activity.txt"
+    echo "received_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$FLOW_DIR/activity.txt"
+
+    echo "[bastion] activity received for tenant: $BUSINESS"
+  done
+done
