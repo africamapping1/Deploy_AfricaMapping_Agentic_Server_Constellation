@@ -2,19 +2,28 @@
 set -euo pipefail
 
 BASE="/opt/africamapping"
-FLOW_DIR="$BASE/flows/flow-02"
-DB_DIR="$BASE/db/africamapping"
-DB_FILE="$DB_DIR/activities.log"
+TENANTS_DIR="$BASE/tenants"
 
-mkdir -p "$DB_DIR"
+FOUND=0
 
-if [ ! -f "$FLOW_DIR/activity-processed.txt" ]; then
-  echo "[db] no processed AfricaMapping activity found"
-  exit 0
+for TENANT_PATH in "$TENANTS_DIR"/*; do
+  [ -d "$TENANT_PATH" ] || continue
+
+  FLOW_DIR="$TENANT_PATH/flows/flow-02"
+  INPUT_FILE="$FLOW_DIR/activity-processed.txt"
+  DATA_DIR="$TENANT_PATH/data/flow-02"
+  OUTPUT_FILE="$DATA_DIR/activity-stored.txt"
+
+  if [ -f "$INPUT_FILE" ]; then
+    FOUND=1
+    mkdir -p "$DATA_DIR"
+    cp "$INPUT_FILE" "$OUTPUT_FILE"
+    echo "stored_by=server-03-db" >> "$OUTPUT_FILE"
+    echo "stored_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$OUTPUT_FILE"
+    echo "[db] $(basename "$TENANT_PATH") activity stored"
+  fi
+done
+
+if [ "$FOUND" -eq 0 ]; then
+  echo "[db] no tenant activity to store"
 fi
-
-echo "-----" >> "$DB_FILE"
-cat "$FLOW_DIR/activity-processed.txt" >> "$DB_FILE"
-echo "stored_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$DB_FILE"
-
-echo "[db] AfricaMapping activity stored"
