@@ -1,0 +1,13 @@
+project_id=project-001
+business=realestate-ai
+name=Evaluate 123 Example Street
+type=property-investment
+status=intake
+priority=high
+address=123 Example Street
+city=Austin
+state=TX
+price=350000
+expected_rent=2200
+created_at=2026-04-02T00:00:00Z
+requested_by=system
