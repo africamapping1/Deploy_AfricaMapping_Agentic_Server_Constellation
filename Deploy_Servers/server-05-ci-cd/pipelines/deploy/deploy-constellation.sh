@@ -184,6 +184,10 @@ log "Running strategist analysis"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/analyze-system.sh
 log "Strategist analysis completed"
 
+log "Running real estate intelligence analysis"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/analyze-realestate.sh
+log "Real estate intelligence analysis completed"
+
 log "Generating business summary"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/generate-business-summary.sh
 log "Business summary generated"
