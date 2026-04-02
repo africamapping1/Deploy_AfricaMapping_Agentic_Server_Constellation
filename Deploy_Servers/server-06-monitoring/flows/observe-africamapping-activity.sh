@@ -2,16 +2,29 @@
 set -euo pipefail
 
 BASE="/opt/africamapping"
-FLOW_DIR="$BASE/flows/flow-02"
-LOG="/var/log/africamapping/flow-02.log"
+TENANTS_DIR="$BASE/tenants"
 
-if [ ! -f "$FLOW_DIR/activity-processed.txt" ]; then
-  echo "[monitoring] no processed AfricaMapping activity to observe" | tee -a "$LOG"
-  exit 0
+FOUND=0
+
+for TENANT_PATH in "$TENANTS_DIR"/*; do
+  [ -d "$TENANT_PATH" ] || continue
+
+  FLOW_DIR="$TENANT_PATH/flows/flow-02"
+  INPUT_FILE="$FLOW_DIR/activity-processed.txt"
+  OBS_DIR="$TENANT_PATH/observations/flow-02"
+  OUTPUT_FILE="$OBS_DIR/activity-observed.txt"
+
+  if [ -f "$INPUT_FILE" ]; then
+    FOUND=1
+    mkdir -p "$OBS_DIR"
+    cp "$INPUT_FILE" "$OUTPUT_FILE"
+    echo "---" >> "$OUTPUT_FILE"
+    echo "observed_by=server-06-monitoring" >> "$OUTPUT_FILE"
+    echo "observed_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$OUTPUT_FILE"
+    echo "[monitoring] observed Flow-02 for tenant: $(basename "$TENANT_PATH")"
+  fi
+done
+
+if [ "$FOUND" -eq 0 ]; then
+  echo "[monitoring] no tenant activity to observe"
 fi
-
-echo "[monitoring] observed Flow-02 at $(date -u '+%Y-%m-%dT%H:%M:%SZ')" | tee -a "$LOG"
-cat "$FLOW_DIR/activity-processed.txt" | tee -a "$LOG"
-echo "---" | tee -a "$LOG"
-
-echo "[monitoring] Flow-02 observation recorded"
