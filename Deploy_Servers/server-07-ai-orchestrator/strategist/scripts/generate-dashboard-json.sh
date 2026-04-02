@@ -9,9 +9,8 @@ STATE_FILE="$BASE/deployment-state/constellation-status.json"
 REL_FILE="$BASE/Deploy_Servers/server-07-ai-orchestrator/governance-loop/relationship-validation.md"
 GOV_FILE="$BASE/Deploy_Servers/server-07-ai-orchestrator/governor/decisions/latest-decision.md"
 INFRA_FILE="$BASE/infrastructure/latest-health.txt"
-PROJECT_DIR="$BASE/flows/flow-03"
-PROGRAM_FILE="$BASE/flows/flow-04/program-processed.txt"
 HEALTH_FILE="$BASE/Deploy_Servers/server-07-ai-orchestrator/governance-loop/latest-health.md"
+TENANTS_DIR="$BASE/tenants"
 
 mkdir -p "$OUT_DIR"
 
@@ -21,10 +20,8 @@ if [ -f "$STATE_FILE" ]; then
 fi
 
 governance_health="unknown"
-if [ -f "$HEALTH_FILE" ]; then
-  if grep -q "healthy" "$HEALTH_FILE"; then
-    governance_health="healthy"
-  fi
+if [ -f "$HEALTH_FILE" ] && grep -q "healthy" "$HEALTH_FILE"; then
+  governance_health="healthy"
 fi
 
 validation_result="unknown"
@@ -38,26 +35,12 @@ if [ -f "$GOV_FILE" ]; then
 fi
 
 restart_required="unknown"
-gpu_status="unknown
-"
-
-PROJECT_COUNT=$(find "$PROJECT_DIR" -maxdepth 1 -type f -name 'project-*-processed.txt' | wc -l | tr -d ' ')
-PROGRAM_COUNT=0
-if [ -f "$PROGRAM_FILE" ]; then
-  PROGRAM_COUNT=1
-fi
-
-ALERTS_JSON=""
-if [ "$validation_result" != "PASS" ]; then
-  ALERTS_JSON="\"Program-project relationship issue detected\""
-fi
-
-
+gpu_status="unknown"
 if [ -f "$INFRA_FILE" ]; then
-  if grep -q "System restart is required." "$INFRA_FILE"; then
-    restart_required="true"
-  else
+  if grep -q "No restart required." "$INFRA_FILE"; then
     restart_required="false"
+  elif grep -q "System restart is required." "$INFRA_FILE"; then
+    restart_required="true"
   fi
 
   if grep -q "No GPU detected." "$INFRA_FILE"; then
@@ -68,48 +51,81 @@ if [ -f "$INFRA_FILE" ]; then
 fi
 
 projects_json=""
+programs_json=""
+project_count=0
+program_count=0
+alerts_json=""
 first_project=true
-for f in "$PROJECT_DIR"/project-*-processed.txt; do
-  [ -e "$f" ] || continue
+first_program=true
 
-  project_id=$(grep '^project_id=' "$f" | head -n 1 | cut -d '=' -f2-)
-  project_name=$(grep '^name=' "$f" | head -n 1 | cut -d '=' -f2- | sed 's/"/\\"/g')
-  project_status=$(grep '^status=' "$f" | tail -n 1 | cut -d '=' -f2-)
+for TENANT_PATH in "$TENANTS_DIR"/*; do
+  [ -d "$TENANT_PATH" ] || continue
 
-  if [ "$first_project" = true ]; then
-    first_project=false
-  else
-    projects_json+=","
-  fi
+  FLOW03="$TENANT_PATH/flows/flow-03"
+  FLOW04="$TENANT_PATH/flows/flow-04"
 
-  projects_json+="
+  for f in "$FLOW03"/*-processed.txt; do
+    [ -f "$f" ] || continue
+
+    project_id=$(grep '^project_id=' "$f" | head -n 1 | cut -d '=' -f2-)
+    project_name=$(grep '^name=' "$f" | head -n 1 | cut -d '=' -f2- | sed 's/"/\\"/g')
+    project_status=$(grep '^status=' "$f" | tail -n 1 | cut -d '=' -f2-)
+
+    project_count=$((project_count+1))
+
+    if [ "$first_project" = true ]; then
+      first_project=false
+    else
+      projects_json+=","
+    fi
+
+    projects_json+="
     {
       \"id\": \"$project_id\",
       \"name\": \"$project_name\",
       \"status\": \"$project_status\"
     }"
+  done
+
+  for f in "$FLOW04"/*-processed.txt; do
+    [ -f "$f" ] || continue
+
+    program_id=$(grep '^program_id=' "$f" | head -n 1 | cut -d '=' -f2-)
+    program_name=$(grep '^name=' "$f" | head -n 1 | cut -d '=' -f2- | sed 's/"/\\"/g')
+    program_status=$(grep '^status=' "$f" | tail -n 1 | cut -d '=' -f2-)
+
+    program_projects_json=""
+    first_prog_project=true
+    while IFS= read -r project_ref; do
+      [ -n "$project_ref" ] || continue
+      if [ "$first_prog_project" = true ]; then
+        first_prog_project=false
+      else
+        program_projects_json+=", "
+      fi
+      program_projects_json+="\"$project_ref\""
+    done < <(awk '/^projects:/{flag=1; next} flag && /^- /{print substr($0,3)} flag && !/^- / && NF{flag=0}' "$f")
+
+    program_count=$((program_count+1))
+
+    if [ "$first_program" = true ]; then
+      first_program=false
+    else
+      programs_json+=","
+    fi
+
+    programs_json+="
+    {
+      \"id\": \"$program_id\",
+      \"name\": \"$program_name\",
+      \"status\": \"$program_status\",
+      \"projects\": [${program_projects_json}]
+    }"
+  done
 done
 
-program_id=""
-program_name=""
-program_status=""
-program_projects_json=""
-
-if [ -f "$PROGRAM_FILE" ]; then
-  program_id=$(grep '^program_id=' "$PROGRAM_FILE" | head -n 1 | cut -d '=' -f2-)
-  program_name=$(grep '^name=' "$PROGRAM_FILE" | head -n 1 | cut -d '=' -f2- | sed 's/"/\\"/g')
-  program_status=$(grep '^status=' "$PROGRAM_FILE" | tail -n 1 | cut -d '=' -f2-)
-
-  first_prog_project=true
-  while IFS= read -r project_ref; do
-    [ -n "$project_ref" ] || continue
-    if [ "$first_prog_project" = true ]; then
-      first_prog_project=false
-    else
-      program_projects_json+=", "
-    fi
-    program_projects_json+="\"$project_ref\""
-  done < <(awk '/^projects:/{flag=1; next} flag && /^- /{print substr($0,3)} flag && !/^- / && NF{flag=0}' "$PROGRAM_FILE")
+if [ "$validation_result" != "PASS" ]; then
+  alerts_json="\"Program-project relationship issue detected\""
 fi
 
 cat > "$OUT_FILE" <<EOFJSON
@@ -119,22 +135,14 @@ cat > "$OUT_FILE" <<EOFJSON
     "heartbeat_state": "$heartbeat_state",
     "governance_health": "$governance_health"
   },
-
   "metrics": {
-    "projects": $PROJECT_COUNT,
-    "programs": $PROGRAM_COUNT
+    "projects": $project_count,
+    "programs": $program_count
   },
-  "alerts": [${ALERTS_JSON}],
-
+  "alerts": [${alerts_json}],
   "projects": [${projects_json}
   ],
-  "programs": [
-    {
-      "id": "$program_id",
-      "name": "$program_name",
-      "status": "$program_status",
-      "projects": [${program_projects_json}]
-    }
+  "programs": [${programs_json}
   ],
   "validation": {
     "result": "$validation_result"
