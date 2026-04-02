@@ -1,0 +1,10 @@
+program_id=program-001
+business=realestate-ai
+name=Starter Property Portfolio
+status=intake
+priority=high
+created_at=2026-04-02T00:00:00Z
+requested_by=system
+
+projects:
+- project-001
