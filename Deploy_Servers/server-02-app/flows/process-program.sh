@@ -16,10 +16,7 @@ for TENANT_PATH in "$TENANTS_DIR"/*; do
   if [ -f "$INPUT_FILE" ]; then
     FOUND=1
 
-    if [ -f "$OUTPUT_FILE" ]; then
-      echo "[app] $(basename "$TENANT_PATH") program already processed, skipping"
-      continue
-    fi
+    rm -f "$OUTPUT_FILE"
 
     cp "$INPUT_FILE" "$OUTPUT_FILE"
     echo "processed_by=server-02-app" >> "$OUTPUT_FILE"

@@ -14,9 +14,13 @@ FLOW_DIR="$TENANT_DIR/flows/flow-04"
 
 mkdir -p "$FLOW_DIR"
 
+
+
 cp "$INPUT_FILE" "$FLOW_DIR/program.txt"
 
 echo "received_by=server-01-bastion" >> "$FLOW_DIR/program.txt"
 echo "received_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$FLOW_DIR/program.txt"
+
+
 
 echo "[bastion] program received for tenant: $BUSINESS"
