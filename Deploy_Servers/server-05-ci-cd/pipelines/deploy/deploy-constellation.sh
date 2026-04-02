@@ -188,6 +188,10 @@ log "Running real estate intelligence analysis"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/analyze-realestate.sh
 log "Real estate intelligence analysis completed"
 
+log "Running real estate portfolio intelligence"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/analyze-realestate-portfolio.sh
+log "Real estate portfolio intelligence completed"
+
 log "Generating business summary"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/generate-business-summary.sh
 log "Business summary generated"
