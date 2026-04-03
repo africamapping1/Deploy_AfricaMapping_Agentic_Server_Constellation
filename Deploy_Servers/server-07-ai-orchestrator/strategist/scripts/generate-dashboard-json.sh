@@ -9,6 +9,7 @@ STATE_FILE="$BASE/deployment-state/constellation-status.json"
 REL_FILE="$BASE/Deploy_Servers/server-07-ai-orchestrator/governance-loop/relationship-validation.md"
 GOV_FILE="$BASE/Deploy_Servers/server-07-ai-orchestrator/governor/decisions/latest-decision.md"
 INFRA_FILE="$BASE/infrastructure/latest-health.txt"
+REALESTATE_PORTFOLIO_FILE="$BASE/Deploy_Servers/server-07-ai-orchestrator/strategist/outputs/realestate-portfolio-analysis.md"
 HEALTH_FILE="$BASE/Deploy_Servers/server-07-ai-orchestrator/governance-loop/latest-health.md"
 TENANTS_DIR="$BASE/tenants"
 
@@ -49,6 +50,13 @@ if [ -f "$INFRA_FILE" ]; then
     gpu_status="present"
   fi
 fi
+
+realestate_total_properties=0
+realestate_average_roi="0.00"
+realestate_portfolio_risk="unknown"
+realestate_recommendation="unknown"
+realestate_best_opportunity=""
+realestate_lowest_yield=""
 
 projects_json=""
 programs_json=""
@@ -128,6 +136,15 @@ if [ "$validation_result" != "PASS" ]; then
   alerts_json="\"Program-project relationship issue detected\""
 fi
 
+if [ -f "$REALESTATE_PORTFOLIO_FILE" ]; then
+  realestate_total_properties=$(grep '^Total Properties:' "$REALESTATE_PORTFOLIO_FILE" | head -n 1 | cut -d ':' -f2- | xargs || echo 0)
+  realestate_average_roi=$(grep '^Average ROI:' "$REALESTATE_PORTFOLIO_FILE" | head -n 1 | cut -d ':' -f2- | tr -d '%' | xargs || echo "0.00")
+  realestate_portfolio_risk=$(grep '^Portfolio Risk:' "$REALESTATE_PORTFOLIO_FILE" | head -n 1 | cut -d ':' -f2- | xargs || echo "unknown")
+  realestate_recommendation=$(grep '^Recommendation:' "$REALESTATE_PORTFOLIO_FILE" | head -n 1 | cut -d ':' -f2- | xargs | sed 's/"/\\"/g' || echo "unknown")
+  realestate_best_opportunity=$(awk '/## Best Opportunity/{getline; print; exit}' "$REALESTATE_PORTFOLIO_FILE" | sed 's/"/\\"/g')
+  realestate_lowest_yield=$(awk '/## Lowest Yield/{getline; print; exit}' "$REALESTATE_PORTFOLIO_FILE" | sed 's/"/\\"/g')
+fi
+
 cat > "$OUT_FILE" <<EOFJSON
 {
   "generated_at": "$(date -u '+%Y-%m-%dT%H:%M:%SZ')",
@@ -140,13 +157,25 @@ cat > "$OUT_FILE" <<EOFJSON
     "programs": $program_count
   },
   "alerts": [${alerts_json}],
+
   "projects": [${projects_json}
   ],
   "programs": [${programs_json}
   ],
+
+  "realestate": {
+    "total_properties": $realestate_total_properties,
+    "average_roi": $realestate_average_roi,
+    "portfolio_risk": "$realestate_portfolio_risk",
+    "recommendation": "$realestate_recommendation",
+    "best_opportunity": "$realestate_best_opportunity",
+    "lowest_yield": "$realestate_lowest_yield"
+  },
+
   "validation": {
     "result": "$validation_result"
   },
+
   "governor": {
     "decision": "$governor_decision"
   },
