@@ -57,6 +57,12 @@ realestate_portfolio_risk="unknown"
 realestate_recommendation="unknown"
 realestate_best_opportunity=""
 realestate_lowest_yield=""
+realestate_portfolio_value=0
+realestate_monthly_income=0
+realestate_annual_income=0
+realestate_estimated_yield_percent="0.00"
+realestate_performance_trend="stable"
+realestate_occupancy_status="unknown"
 
 projects_json=""
 programs_json=""
@@ -145,6 +151,47 @@ if [ -f "$REALESTATE_PORTFOLIO_FILE" ]; then
   realestate_lowest_yield=$(awk '/## Lowest Yield/{getline; print; exit}' "$REALESTATE_PORTFOLIO_FILE" | sed 's/"/\\"/g')
 fi
 
+REALESTATE_FLOW_DIR="$BASE/tenants/realestate-ai/flows/flow-03"
+
+if [ -d "$REALESTATE_FLOW_DIR" ]; then
+  total_price=0
+  total_expected_rent=0
+  property_count=0
+
+  for f in "$REALESTATE_FLOW_DIR"/*-processed.txt; do
+    [ -f "$f" ] || continue
+
+    price=$(grep '^price=' "$f" | head -n 1 | cut -d '=' -f2-)
+    expected_rent=$(grep '^expected_rent=' "$f" | head -n 1 | cut -d '=' -f2-)
+
+    price=${price:-0}
+    expected_rent=${expected_rent:-0}
+
+    total_price=$((total_price + price))
+    total_expected_rent=$((total_expected_rent + expected_rent))
+    property_count=$((property_count + 1))
+  done
+
+  realestate_portfolio_value=$total_price
+  realestate_monthly_income=$total_expected_rent
+  realestate_annual_income=$((total_expected_rent * 12))
+
+  if [ "$total_price" -gt 0 ]; then
+    realestate_estimated_yield_percent=$(awk "BEGIN { printf \"%.2f\", ($realestate_annual_income / $total_price) * 100 }")
+  fi
+
+  trend_check=$(awk "BEGIN { if ($realestate_estimated_yield_percent >= 7.0) print 1; else print 0 }")
+  if [ "$trend_check" -eq 1 ]; then
+    realestate_performance_trend="up"
+  else
+    realestate_performance_trend="stable"
+  fi
+
+  if [ "$property_count" -gt 0 ]; then
+    realestate_occupancy_status="occupied-assumed"
+  fi
+fi
+
 cat > "$OUT_FILE" <<EOFJSON
 {
   "generated_at": "$(date -u '+%Y-%m-%dT%H:%M:%SZ')",
@@ -165,12 +212,24 @@ cat > "$OUT_FILE" <<EOFJSON
 
   "realestate": {
     "total_properties": $realestate_total_properties,
+    "portfolio_value": $realestate_portfolio_value,
+    "monthly_income": $realestate_monthly_income,
+    "annual_income": $realestate_annual_income,
     "average_roi": $realestate_average_roi,
+    "estimated_yield_percent": $realestate_estimated_yield_percent,
     "portfolio_risk": "$realestate_portfolio_risk",
+    "performance_trend": "$realestate_performance_trend",
+    "occupancy_status": "$realestate_occupancy_status",
     "recommendation": "$realestate_recommendation",
     "best_opportunity": "$realestate_best_opportunity",
     "lowest_yield": "$realestate_lowest_yield"
   },
+
+
+
+
+
+
 
   "validation": {
     "result": "$validation_result"
