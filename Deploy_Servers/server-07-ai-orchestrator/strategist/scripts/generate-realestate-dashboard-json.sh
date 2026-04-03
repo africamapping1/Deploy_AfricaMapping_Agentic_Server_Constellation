@@ -70,11 +70,33 @@ for f in "$FLOW03"/*-processed.txt; do
     projects_json+=","
   fi
 
-  projects_json+="
+project_price=$(grep '^price=' "$f" | head -n 1 | cut -d '=' -f2-)
+project_expected_rent=$(grep '^expected_rent=' "$f" | head -n 1 | cut -d '=' -f2-)
+project_address=$(grep '^address=' "$f" | head -n 1 | cut -d '=' -f2- | sed 's/"/\\"/g')
+project_city=$(grep '^city=' "$f" | head -n 1 | cut -d '=' -f2- | sed 's/"/\\"/g')
+project_state=$(grep '^state=' "$f" | head -n 1 | cut -d '=' -f2- | sed 's/"/\\"/g')
+
+project_price=${project_price:-0}
+project_expected_rent=${project_expected_rent:-0}
+
+project_annual_rent=$((project_expected_rent * 12))
+project_roi="0.00"
+if [ "$project_price" -gt 0 ]; then
+  project_roi=$(awk "BEGIN { printf \"%.2f\", ($project_annual_rent / $project_price) * 100 }")
+fi
+
+projects_json+="
     {
       \"id\": \"$project_id\",
       \"name\": \"$project_name\",
-      \"status\": \"$project_status\"
+      \"address\": \"$project_address\",
+      \"city\": \"$project_city\",
+      \"state\": \"$project_state\",
+      \"status\": \"$project_status\",
+      \"value\": $project_price,
+      \"monthly_income\": $project_expected_rent,
+      \"annual_income\": $project_annual_rent,
+      \"estimated_roi\": $project_roi
     }"
 done
 
@@ -183,28 +205,24 @@ cat > "$OUT_FILE" <<EOFJSON
     "heartbeat_state": "$heartbeat_state",
     "governance_health": "$governance_health"
   },
-  "metrics": {
-    "projects": $project_count,
-    "programs": $program_count
-  },
-  "projects": [${projects_json}
-  ],
-  "programs": [${programs_json}
-  ],
-  "realestate": {
-    "total_properties": $realestate_total_properties,
+  "portfolio": {
+    "property_count": $realestate_total_properties,
     "portfolio_value": $realestate_portfolio_value,
     "monthly_income": $realestate_monthly_income,
     "annual_income": $realestate_annual_income,
     "average_roi": $realestate_average_roi,
     "estimated_yield_percent": $realestate_estimated_yield_percent,
-    "portfolio_risk": "$realestate_portfolio_risk",
-    "performance_trend": "$realestate_performance_trend",
+    "risk": "$realestate_portfolio_risk",
+    "trend": "$realestate_performance_trend",
     "occupancy_status": "$realestate_occupancy_status",
     "recommendation": "$realestate_recommendation",
     "best_opportunity": "$realestate_best_opportunity",
     "lowest_yield": "$realestate_lowest_yield"
   },
+  "properties": [${projects_json}
+  ],
+  "portfolio_groups": [${programs_json}
+  ],
   "governor": {
     "decision": "$governor_decision"
   },
