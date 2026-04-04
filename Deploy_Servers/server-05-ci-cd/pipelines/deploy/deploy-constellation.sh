@@ -217,6 +217,10 @@ log "Generating realestate customer dashboard JSON"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/generate-realestate-customer-dashboard.sh
 log "Realestate customer dashboard JSON generated"
 
+log "Generating realestate employee dashboard JSON"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/generate-realestate-employee-dashboard.sh
+log "Realestate employee dashboard JSON generated"
+
 log "Reporting Governance Loop health"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governance-loop/report-health.sh
 log "Governance Loop health reported"
