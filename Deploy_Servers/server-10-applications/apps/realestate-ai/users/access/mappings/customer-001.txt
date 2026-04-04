@@ -1,0 +1,9 @@
+customer_id=customer-001
+tenant=realestate-ai
+
+projects:
+- project-001
+- project-002
+
+programs:
+- program-001

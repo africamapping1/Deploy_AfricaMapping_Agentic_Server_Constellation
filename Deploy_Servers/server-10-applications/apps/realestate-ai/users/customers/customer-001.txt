@@ -1,0 +1,6 @@
+customer_id=customer-001
+name=John Investor
+tenant=realestate-ai
+role=customer
+status=active
+created_at=2026-04-03T00:00:00Z
