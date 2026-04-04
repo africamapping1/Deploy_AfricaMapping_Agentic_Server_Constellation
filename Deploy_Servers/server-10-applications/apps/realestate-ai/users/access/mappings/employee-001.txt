@@ -1,0 +1,12 @@
+employee_id=employee-001
+tenant=realestate-ai
+
+customers:
+- customer-001
+
+projects:
+- project-001
+- project-002
+
+programs:
+- program-001

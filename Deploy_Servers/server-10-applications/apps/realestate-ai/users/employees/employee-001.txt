@@ -1,0 +1,7 @@
+employee_id=employee-001
+name=Sarah Portfolio Manager
+tenant=realestate-ai
+role=employee
+status=active
+title=portfolio-manager
+created_at=2026-04-04T00:00:00Z
