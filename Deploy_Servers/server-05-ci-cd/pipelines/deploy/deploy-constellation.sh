@@ -205,21 +205,50 @@ if ! grep -q "APPROVED: Active work detected. System operating normally." /opt/a
   exit 1
 fi
 
+
+
 log "Generating dashboard JSON"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/generate-dashboard-json.sh
+
+if [ ! -f /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/dashboard/latest-dashboard.json ]; then
+  log "ERROR: Shared dashboard not generated"
+  exit 1
+fi
+
 log "Dashboard JSON generated"
+
+
 
 log "Generating realestate tenant dashboard JSON"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/generate-realestate-dashboard-json.sh
+
+if [ ! -f /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/dashboard/realestate-ai-dashboard.json ]; then
+  log "ERROR: Realestate tenant dashboard not generated"
+  exit 1
+fi
+
 log "Realestate tenant dashboard JSON generated"
 
 log "Generating realestate customer dashboard JSON"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/generate-realestate-customer-dashboard.sh
+
+if [ ! -f /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/dashboard/customers/customer-001-dashboard.json ]; then
+  log "ERROR: Realestate customer dashboard not generated"
+  exit 1
+fi
+
 log "Realestate customer dashboard JSON generated"
 
 log "Generating realestate employee dashboard JSON"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/generate-realestate-employee-dashboard.sh
+
+if [ ! -f /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/dashboard/employees/employee-001-dashboard.json ]; then
+  log "ERROR: Employee dashboard not generated"
+  exit 1
+fi
+
 log "Realestate employee dashboard JSON generated"
+
 
 log "Reporting Governance Loop health"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governance-loop/report-health.sh
