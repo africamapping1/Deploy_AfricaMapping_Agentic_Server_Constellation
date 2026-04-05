@@ -1,12 +1,16 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-OUTPUT="/opt/africamapping/business/latest-summary.md"
+BASE="/opt/africamapping"
+TENANTS_DIR="$BASE/tenants"
+OUTPUT_DIR="$BASE/business"
+OUTPUT="$OUTPUT_DIR/latest-summary.md"
 
-mkdir -p /opt/africamapping/business
+mkdir -p "$OUTPUT_DIR"
 
 echo "# Business Summary" > "$OUTPUT"
 echo "" >> "$OUTPUT"
-echo "Generated at $(date -u)" >> "$OUTPUT"
+echo "Generated at $(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$OUTPUT"
 echo "" >> "$OUTPUT"
 
 ########################################
@@ -16,25 +20,42 @@ echo "" >> "$OUTPUT"
 echo "## Active Projects" >> "$OUTPUT"
 echo "" >> "$OUTPUT"
 
-PROJECT_FILES=$(find /opt/africamapping/flows/flow-03 -maxdepth 1 -type f -name 'project-*-processed.txt' | sort)
+FOUND_PROJECTS=0
 
-if [ -n "$PROJECT_FILES" ]; then
-  while IFS= read -r PROJECT_FILE; do
-    [ -n "$PROJECT_FILE" ] || continue
+for TENANT_PATH in "$TENANTS_DIR"/*; do
+  [ -d "$TENANT_PATH" ] || continue
 
-    PROJECT_NAME=$(grep "^name=" "$PROJECT_FILE" | cut -d '=' -f2-)
-    PROJECT_STATUS=$(grep "^status=" "$PROJECT_FILE" | tail -n 1 | cut -d '=' -f2-)
-    PROJECT_UPDATED=$(grep "^processed_at=" "$PROJECT_FILE" | tail -n 1 | cut -d '=' -f2-)
-    PROJECT_ID=$(grep "^project_id=" "$PROJECT_FILE" | cut -d '=' -f2-)
+  TENANT_NAME="$(basename "$TENANT_PATH")"
+  FLOW03_DIR="$TENANT_PATH/flows/flow-03"
 
-    echo "### $PROJECT_ID" >> "$OUTPUT"
+  PROJECT_FILES=$(find "$FLOW03_DIR" -maxdepth 1 -type f -name 'project-*-processed.txt' | sort 2>/dev/null || true)
+
+  if [ -n "$PROJECT_FILES" ]; then
+    echo "### Tenant: $TENANT_NAME" >> "$OUTPUT"
     echo "" >> "$OUTPUT"
-    echo "- Name: $PROJECT_NAME" >> "$OUTPUT"
-    echo "- Status: $PROJECT_STATUS" >> "$OUTPUT"
-    echo "- Last Updated: $PROJECT_UPDATED" >> "$OUTPUT"
-    echo "" >> "$OUTPUT"
-  done <<< "$PROJECT_FILES"
-else
+
+    while IFS= read -r PROJECT_FILE; do
+      [ -n "$PROJECT_FILE" ] || continue
+      [ -f "$PROJECT_FILE" ] || continue
+
+      FOUND_PROJECTS=1
+
+      PROJECT_NAME=$(grep "^name=" "$PROJECT_FILE" | head -n 1 | cut -d '=' -f2-)
+      PROJECT_STATUS=$(grep "^status=" "$PROJECT_FILE" | tail -n 1 | cut -d '=' -f2-)
+      PROJECT_UPDATED=$(grep "^processed_at=" "$PROJECT_FILE" | tail -n 1 | cut -d '=' -f2-)
+      PROJECT_ID=$(grep "^project_id=" "$PROJECT_FILE" | head -n 1 | cut -d '=' -f2-)
+
+      echo "#### $PROJECT_ID" >> "$OUTPUT"
+      echo "" >> "$OUTPUT"
+      echo "- Name: $PROJECT_NAME" >> "$OUTPUT"
+      echo "- Status: $PROJECT_STATUS" >> "$OUTPUT"
+      echo "- Last Updated: $PROJECT_UPDATED" >> "$OUTPUT"
+      echo "" >> "$OUTPUT"
+    done <<< "$PROJECT_FILES"
+  fi
+done
+
+if [ "$FOUND_PROJECTS" -eq 0 ]; then
   echo "No active project data found." >> "$OUTPUT"
   echo "" >> "$OUTPUT"
 fi
@@ -46,39 +67,54 @@ fi
 echo "## Active Programs" >> "$OUTPUT"
 echo "" >> "$OUTPUT"
 
-PROGRAM_FILE="/opt/africamapping/flows/flow-04/program-processed.txt"
+FOUND_PROGRAMS=0
 
-if [ -f "$PROGRAM_FILE" ]; then
-  echo "### Program Details" >> "$OUTPUT"
-  echo "" >> "$OUTPUT"
+for TENANT_PATH in "$TENANTS_DIR"/*; do
+  [ -d "$TENANT_PATH" ] || continue
 
-  PROGRAM_NAME=$(grep "^name=" "$PROGRAM_FILE" | cut -d '=' -f2-)
-  PROGRAM_STATUS=$(grep "^status=" "$PROGRAM_FILE" | tail -n 1 | cut -d '=' -f2-)
-  PROGRAM_UPDATED=$(grep "^processed_at=" "$PROGRAM_FILE" | tail -n 1 | cut -d '=' -f2-)
+  TENANT_NAME="$(basename "$TENANT_PATH")"
+  PROGRAM_FILE="$TENANT_PATH/flows/flow-04/program-processed.txt"
 
-  echo "- Name: $PROGRAM_NAME" >> "$OUTPUT"
-  echo "- Status: $PROGRAM_STATUS" >> "$OUTPUT"
-  echo "- Last Updated: $PROGRAM_UPDATED" >> "$OUTPUT"
+  if [ -f "$PROGRAM_FILE" ]; then
+    FOUND_PROGRAMS=1
 
-  echo "" >> "$OUTPUT"
-  echo "### Related Projects" >> "$OUTPUT"
-  echo "" >> "$OUTPUT"
+    echo "### Tenant: $TENANT_NAME" >> "$OUTPUT"
+    echo "" >> "$OUTPUT"
+    echo "#### Program Details" >> "$OUTPUT"
+    echo "" >> "$OUTPUT"
 
-  RELATED_PROJECTS=$(awk '/^projects:/{flag=1; next} flag && /^- /{print substr($0,3)} flag && !/^- / && NF{flag=0}' "$PROGRAM_FILE")
+    PROGRAM_ID=$(grep "^program_id=" "$PROGRAM_FILE" | head -n 1 | cut -d '=' -f2-)
+    PROGRAM_NAME=$(grep "^name=" "$PROGRAM_FILE" | head -n 1 | cut -d '=' -f2-)
+    PROGRAM_STATUS=$(grep "^status=" "$PROGRAM_FILE" | tail -n 1 | cut -d '=' -f2-)
+    PROGRAM_UPDATED=$(grep "^processed_at=" "$PROGRAM_FILE" | tail -n 1 | cut -d '=' -f2-)
 
-  if [ -n "$RELATED_PROJECTS" ]; then
-    while IFS= read -r project_id; do
-      [ -n "$project_id" ] || continue
-      echo "- $project_id" >> "$OUTPUT"
-    done <<< "$RELATED_PROJECTS"
-  else
-    echo "No related projects listed." >> "$OUTPUT"
+    echo "- Program ID: $PROGRAM_ID" >> "$OUTPUT"
+    echo "- Name: $PROGRAM_NAME" >> "$OUTPUT"
+    echo "- Status: $PROGRAM_STATUS" >> "$OUTPUT"
+    echo "- Last Updated: $PROGRAM_UPDATED" >> "$OUTPUT"
+    echo "" >> "$OUTPUT"
+    echo "#### Related Projects" >> "$OUTPUT"
+    echo "" >> "$OUTPUT"
+
+    RELATED_PROJECTS=$(awk '/^projects:/{flag=1; next} flag && /^- /{print substr($0,3)} flag && !/^- / && NF{flag=0}' "$PROGRAM_FILE")
+
+    if [ -n "$RELATED_PROJECTS" ]; then
+      while IFS= read -r project_id; do
+        [ -n "$project_id" ] || continue
+        echo "- $project_id" >> "$OUTPUT"
+      done <<< "$RELATED_PROJECTS"
+    else
+      echo "No related projects listed." >> "$OUTPUT"
+    fi
+
+    echo "" >> "$OUTPUT"
   fi
-else
-  echo "No active program data found." >> "$OUTPUT"
-fi
+done
 
-echo "" >> "$OUTPUT"
+if [ "$FOUND_PROGRAMS" -eq 0 ]; then
+  echo "No active program data found." >> "$OUTPUT"
+  echo "" >> "$OUTPUT"
+fi
 
 ########################################
 # ACTIVITIES
@@ -87,24 +123,38 @@ echo "" >> "$OUTPUT"
 echo "## Recent Activities" >> "$OUTPUT"
 echo "" >> "$OUTPUT"
 
-ACTIVITY_FILE="/opt/africamapping/flows/flow-02/activity-processed.txt"
-if [ ! -f "$ACTIVITY_FILE" ]; then
-  ACTIVITY_FILE="/opt/africamapping/flows/flow-02/activity.txt"
-fi
+FOUND_ACTIVITIES=0
 
-if [ -f "$ACTIVITY_FILE" ]; then
-  ACTIVITY_TITLE=$(grep "^title=" "$ACTIVITY_FILE" | cut -d '=' -f2-)
-  ACTIVITY_TYPE=$(grep "^type=" "$ACTIVITY_FILE" | cut -d '=' -f2-)
-  ACTIVITY_STATUS=$(grep "^status=" "$ACTIVITY_FILE" | tail -n 1 | cut -d '=' -f2-)
+for TENANT_PATH in "$TENANTS_DIR"/*; do
+  [ -d "$TENANT_PATH" ] || continue
 
-  echo "- Title: $ACTIVITY_TITLE" >> "$OUTPUT"
-  echo "- Type: $ACTIVITY_TYPE" >> "$OUTPUT"
-  echo "- Status: $ACTIVITY_STATUS" >> "$OUTPUT"
-else
+  TENANT_NAME="$(basename "$TENANT_PATH")"
+  ACTIVITY_FILE="$TENANT_PATH/flows/flow-02/activity-processed.txt"
+
+  if [ ! -f "$ACTIVITY_FILE" ]; then
+    ACTIVITY_FILE="$TENANT_PATH/flows/flow-02/activity.txt"
+  fi
+
+  if [ -f "$ACTIVITY_FILE" ]; then
+    FOUND_ACTIVITIES=1
+
+    ACTIVITY_TITLE=$(grep "^title=" "$ACTIVITY_FILE" | head -n 1 | cut -d '=' -f2-)
+    ACTIVITY_TYPE=$(grep "^type=" "$ACTIVITY_FILE" | head -n 1 | cut -d '=' -f2-)
+    ACTIVITY_STATUS=$(grep "^status=" "$ACTIVITY_FILE" | tail -n 1 | cut -d '=' -f2-)
+
+    echo "### Tenant: $TENANT_NAME" >> "$OUTPUT"
+    echo "" >> "$OUTPUT"
+    echo "- Title: $ACTIVITY_TITLE" >> "$OUTPUT"
+    echo "- Type: $ACTIVITY_TYPE" >> "$OUTPUT"
+    echo "- Status: $ACTIVITY_STATUS" >> "$OUTPUT"
+    echo "" >> "$OUTPUT"
+  fi
+done
+
+if [ "$FOUND_ACTIVITIES" -eq 0 ]; then
   echo "No recent activities found." >> "$OUTPUT"
+  echo "" >> "$OUTPUT"
 fi
-
-echo "" >> "$OUTPUT"
 
 ########################################
 # FINAL NOTE
@@ -112,4 +162,4 @@ echo "" >> "$OUTPUT"
 
 echo "## Business Interpretation" >> "$OUTPUT"
 echo "" >> "$OUTPUT"
-echo "The business is operational with active projects and coordinated programs." >> "$OUTPUT"
+echo "The businesses are operational with tenant-specific active projects and coordinated programs." >> "$OUTPUT"
