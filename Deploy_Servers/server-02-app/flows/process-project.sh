@@ -2,42 +2,49 @@
 set -euo pipefail
 
 BASE="/opt/africamapping"
-TENANTS_DIR="$BASE/tenants"
+APPS_DIR="$BASE/Deploy_Servers/server-10-applications/apps"
 
-FOUND=0
+for APP in "$APPS_DIR"/*; do
+  [ -d "$APP" ] || continue
 
-for TENANT_PATH in "$TENANTS_DIR"/*; do
-  [ -d "$TENANT_PATH" ] || continue
-
-  FLOW_DIR="$TENANT_PATH/flows/flow-03"
-  [ -d "$FLOW_DIR" ] || continue
-
-  for INPUT_FILE in "$FLOW_DIR"/project-*.txt; do
+  for INPUT_FILE in "$APP/projects/intake/"*.txt; do
     [ -f "$INPUT_FILE" ] || continue
 
-    case "$INPUT_FILE" in
-      *-processed.txt) continue ;;
-    esac
-
-    FOUND=1
-
-    PROJECT_ID="$(basename "$INPUT_FILE" .txt)"
-    PROCESSED_FILE="$FLOW_DIR/${PROJECT_ID}-processed.txt"
-
-    if [ -f "$PROCESSED_FILE" ]; then
-      echo "[app] $(basename "$TENANT_PATH") $PROJECT_ID already processed, skipping"
-      continue
+    BUSINESS=$(grep '^business=' "$INPUT_FILE" | head -n 1 | cut -d '=' -f2- | tr '[:upper:]' '[:lower:]')
+    if [ -z "${BUSINESS:-}" ]; then
+      BUSINESS="unknown"
     fi
 
-    cp "$INPUT_FILE" "$PROCESSED_FILE"
-    echo "processed_by=server-02-app" >> "$PROCESSED_FILE"
-    echo "processed_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$PROCESSED_FILE"
-    echo "status=active" >> "$PROCESSED_FILE"
+    TENANT_DIR="$BASE/tenants/$BUSINESS"
+    FLOW_DIR="$TENANT_DIR/flows/flow-03"
 
-    echo "[app] $(basename "$TENANT_PATH") $PROJECT_ID processed"
+    mkdir -p "$FLOW_DIR"
+
+    FILENAME=$(basename "$INPUT_FILE")
+    DEST_FILE="$FLOW_DIR/$FILENAME"
+
+    cp "$INPUT_FILE" "$DEST_FILE"
+
+    PROJECT_ID=$(grep '^project_id=' "$DEST_FILE" | head -n 1 | cut -d '=' -f2- || true)
+    if [ -z "${PROJECT_ID:-}" ]; then
+      PROJECT_ID="$(basename "$FILENAME" .txt)"
+    fi
+
+    if ! grep -q '^tenant_id=' "$DEST_FILE"; then
+      echo "tenant_id=$BUSINESS" >> "$DEST_FILE"
+    fi
+
+    if ! grep -q '^local_project_id=' "$DEST_FILE"; then
+      echo "local_project_id=$PROJECT_ID" >> "$DEST_FILE"
+    fi
+
+    if ! grep -q '^global_project_id=' "$DEST_FILE"; then
+      echo "global_project_id=$BUSINESS:$PROJECT_ID" >> "$DEST_FILE"
+    fi
+
+    echo "received_by=server-01-bastion" >> "$DEST_FILE"
+    echo "received_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$DEST_FILE"
+
+    echo "[bastion] project received for tenant: $BUSINESS ($FILENAME)"
   done
 done
-
-if [ "$FOUND" -eq 0 ]; then
-  echo "[app] no tenant project intake found"
-fi
