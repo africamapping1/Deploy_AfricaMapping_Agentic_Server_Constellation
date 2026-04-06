@@ -8,6 +8,20 @@ DASHBOARD_DIR="$BASE/Deploy_Servers/server-07-ai-orchestrator/dashboard"
 REPORT="$OUTPUT_DIR/system-doctor-report.md"
 JSON_REPORT="$DASHBOARD_DIR/system-doctor.json"
 
+STATE_FILE="$BASE/deployment-state/constellation-status.json"
+SETTLED_STATE_FILE="$BASE/deployment-state/constellation-status-settled.json"
+
+NARRATOR_SUMMARY="$BASE/Deploy_Servers/server-07-ai-orchestrator/narrator/reports/latest-summary.md"
+SHARED_DASHBOARD="$DASHBOARD_DIR/latest-dashboard.json"
+TENANT_DASHBOARD="$DASHBOARD_DIR/realestate-ai-dashboard.json"
+CUSTOMER_DASHBOARD="$DASHBOARD_DIR/customers/customer-001-dashboard.json"
+EMPLOYEE_DASHBOARD="$DASHBOARD_DIR/employees/employee-001-dashboard.json"
+
+DECISION_FILE="$BASE/Deploy_Servers/server-07-ai-orchestrator/governor/decisions/latest-decision.md"
+VALIDATION_FILE="$BASE/Deploy_Servers/server-07-ai-orchestrator/governance-loop/relationship-validation.md"
+COMPARISON_REPORT="$BASE/Deploy_Servers/server-07-ai-orchestrator/narrator/reports/latest-comparison.md"
+GOV_HEALTH_FILE="$BASE/Deploy_Servers/server-07-ai-orchestrator/governance-loop/latest-health.md"
+
 mkdir -p "$OUTPUT_DIR"
 mkdir -p "$DASHBOARD_DIR"
 
@@ -42,21 +56,50 @@ add_recommendation() {
   RECOMMENDATIONS="${RECOMMENDATIONS}- $1\n"
 }
 
+extract_heartbeat() {
+  local file="$1"
+  if [ -f "$file" ]; then
+    grep -o '"heartbeat_state": *"[^"]*"' "$file" | head -n 1 | cut -d '"' -f4 || true
+  fi
+}
+
+check_dashboard() {
+  local path="$1"
+  local label="$2"
+
+  if [ -f "$path" ]; then
+    if [ -s "$path" ]; then
+      add_pass "$label present"
+    else
+      add_warning "$label exists but is empty"
+      add_recommendation "Regenerate $label and inspect its generator script."
+    fi
+  else
+    add_fail "$label missing"
+    add_recommendation "Check dashboard generation step for $label."
+  fi
+}
+
 ########################################
-# PLATFORM CHECK
+# PLATFORM CHECKS
 ########################################
 
-STATE_FILE="$BASE/deployment-state/constellation-status.json"
+STATE_HEARTBEAT="unknown"
+SETTLED_HEARTBEAT="unknown"
+SHARED_DASHBOARD_HEARTBEAT="unknown"
+TENANT_DASHBOARD_HEARTBEAT="unknown"
+NARRATOR_HEARTBEAT="unknown"
 
 if [ -f "$STATE_FILE" ]; then
   add_pass "Deployment state exists"
-  HEARTBEAT=$(grep -o '"heartbeat_state": *"[^"]*"' "$STATE_FILE" | cut -d '"' -f4 || true)
+  STATE_HEARTBEAT="$(extract_heartbeat "$STATE_FILE")"
+
   FIRST_DEPLOY=$(grep -o '"first_deploy": *[^,]*' "$STATE_FILE" | awk -F': ' '{print $2}' | tr -d ' ' || true)
 
-  if [ "${HEARTBEAT:-unknown}" = "steady" ]; then
+  if [ "${STATE_HEARTBEAT:-unknown}" = "steady" ]; then
     add_pass "Heartbeat steady"
   else
-    add_warning "Heartbeat not steady (${HEARTBEAT:-unknown})"
+    add_warning "Heartbeat not steady (${STATE_HEARTBEAT:-unknown})"
     add_recommendation "Rerun deployment and inspect deployment-state generation logic."
   fi
 
@@ -69,6 +112,21 @@ if [ -f "$STATE_FILE" ]; then
 else
   add_fail "Deployment state missing"
   add_recommendation "Recreate deployment-state directory and rerun deploy."
+fi
+
+if [ -f "$SETTLED_STATE_FILE" ]; then
+  add_pass "Settled deployment state exists"
+  SETTLED_HEARTBEAT="$(extract_heartbeat "$SETTLED_STATE_FILE")"
+
+  if [ "${SETTLED_HEARTBEAT:-unknown}" = "steady" ]; then
+    add_pass "Settled heartbeat steady"
+  else
+    add_fail "Settled heartbeat not steady"
+    add_recommendation "Inspect settled deployment-state write order and final heartbeat logic."
+  fi
+else
+  add_fail "Settled deployment state missing"
+  add_recommendation "Inspect settled deployment-state generation in deploy pipeline."
 fi
 
 ########################################
@@ -113,44 +171,63 @@ for TENANT in "$TENANTS_DIR"/*; do
   fi
 done
 
+DUPLICATE_PROJECT_IDS=$(find "$BASE/tenants" -path '*/flows/flow-03/*-processed.txt' -type f -printf '%f\n' 2>/dev/null | sort | uniq -d || true)
+if [ -n "$DUPLICATE_PROJECT_IDS" ]; then
+  add_warning "Duplicate processed project IDs exist across tenants"
+  add_recommendation "Consider tenant-qualified IDs if cross-tenant reporting will expand."
+else
+  add_pass "No duplicate processed project IDs across tenants"
+fi
+
 ########################################
 # DASHBOARD CHECKS
 ########################################
 
-check_dashboard() {
-  local path="$1"
-  local label="$2"
+check_dashboard "$SHARED_DASHBOARD" "Shared dashboard"
+check_dashboard "$TENANT_DASHBOARD" "Tenant dashboard"
+check_dashboard "$CUSTOMER_DASHBOARD" "Customer dashboard"
+check_dashboard "$EMPLOYEE_DASHBOARD" "Employee dashboard"
 
-  if [ -f "$path" ]; then
-    if [ -s "$path" ]; then
-      add_pass "$label present"
-    else
-      add_warning "$label exists but is empty"
-      add_recommendation "Regenerate $label and inspect its generator script."
-    fi
-  else
-    add_fail "$label missing"
-    add_recommendation "Check dashboard generation step for $label."
-  fi
-}
+SHARED_DASHBOARD_HEARTBEAT="$(extract_heartbeat "$SHARED_DASHBOARD")"
+TENANT_DASHBOARD_HEARTBEAT="$(extract_heartbeat "$TENANT_DASHBOARD")"
+NARRATOR_HEARTBEAT="$(extract_heartbeat "$NARRATOR_SUMMARY")"
 
-check_dashboard "$DASHBOARD_DIR/latest-dashboard.json" "Shared dashboard"
-check_dashboard "$DASHBOARD_DIR/realestate-ai-dashboard.json" "Tenant dashboard"
-check_dashboard "$DASHBOARD_DIR/customers/customer-001-dashboard.json" "Customer dashboard"
-check_dashboard "$DASHBOARD_DIR/employees/employee-001-dashboard.json" "Employee dashboard"
+if [ -f "$NARRATOR_SUMMARY" ]; then
+  add_pass "Narrator summary present"
+else
+  add_fail "Narrator summary missing"
+  add_recommendation "Inspect narrator summary generation order in deploy pipeline."
+fi
+
+if [ -n "${SETTLED_HEARTBEAT:-}" ] && [ "${SHARED_DASHBOARD_HEARTBEAT:-unknown}" = "${SETTLED_HEARTBEAT:-unknown}" ]; then
+  add_pass "Shared dashboard heartbeat matches settled state"
+else
+  add_fail "Shared dashboard heartbeat does not match settled state"
+  add_recommendation "Inspect shared dashboard generator state-source selection."
+fi
+
+if [ -n "${SETTLED_HEARTBEAT:-}" ] && [ "${TENANT_DASHBOARD_HEARTBEAT:-unknown}" = "${SETTLED_HEARTBEAT:-unknown}" ]; then
+  add_pass "Tenant dashboard heartbeat matches settled state"
+else
+  add_fail "Tenant dashboard heartbeat does not match settled state"
+  add_recommendation "Inspect tenant dashboard generator state-source selection."
+fi
+
+if [ -n "${SETTLED_HEARTBEAT:-}" ] && [ "${NARRATOR_HEARTBEAT:-unknown}" = "${SETTLED_HEARTBEAT:-unknown}" ]; then
+  add_pass "Narrator heartbeat matches settled state"
+else
+  add_fail "Narrator heartbeat does not match settled state"
+  add_recommendation "Inspect narrator summary sequencing and settled-state read preference."
+fi
 
 ########################################
-# GOVERNANCE CHECK
+# GOVERNANCE CHECKS
 ########################################
 
-DECISION_FILE="$BASE/Deploy_Servers/server-07-ai-orchestrator/governor/decisions/latest-decision.md"
-VALIDATION_FILE="$BASE/Deploy_Servers/server-07-ai-orchestrator/governance-loop/relationship-validation.md"
-INFRA_FILE="$BASE/Deploy_Servers/server-07-ai-orchestrator/dashboard/latest-dashboard.json"
-
-if [ -f "$DECISION_FILE" ] && grep -q "APPROVED" "$DECISION_FILE"; then
+if [ -f "$DECISION_FILE" ] && grep -q "APPROVED: Active work detected. System operating normally." "$DECISION_FILE"; then
   add_pass "Governor approved system"
 else
-  add_warning "Governor approval missing"
+  add_fail "Governor approval missing"
   add_recommendation "Inspect governor decision logic and latest decision file."
 fi
 
@@ -161,7 +238,21 @@ else
   add_recommendation "Inspect tenant program/project linkage and validation script."
 fi
 
-if [ -f "$INFRA_FILE" ] && grep -q '"restart_required": true' "$INFRA_FILE"; then
+if [ -f "$COMPARISON_REPORT" ] && grep -q "The deployment matched expected runtime artifacts." "$COMPARISON_REPORT"; then
+  add_pass "Preview versus actual comparison passed"
+else
+  add_fail "Preview versus actual comparison did not pass"
+  add_recommendation "Inspect deploy ordering and expected runtime artifact generation."
+fi
+
+if [ -f "$GOV_HEALTH_FILE" ] && grep -q "Governance Loop health is healthy." "$GOV_HEALTH_FILE"; then
+  add_pass "Governance Loop health is healthy"
+else
+  add_fail "Governance Loop health is not healthy"
+  add_recommendation "Inspect governance-loop report ordering and dependency files."
+fi
+
+if [ -f "$SHARED_DASHBOARD" ] && grep -q '"restart_required": true' "$SHARED_DASHBOARD"; then
   add_warning "Infrastructure restart required"
   add_recommendation "Schedule safe reboot window if appropriate."
 else
