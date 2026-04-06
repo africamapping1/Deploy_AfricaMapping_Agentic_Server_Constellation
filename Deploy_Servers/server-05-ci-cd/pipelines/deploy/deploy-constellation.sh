@@ -42,6 +42,7 @@ if [ ! -f "$STATE_FILE" ]; then
   HEARTBEAT_STATE="initializing"
   log "First-time deployment detected"
 else
+  FIRST_DEPLOY=false
   HEARTBEAT_STATE="steady"
   log "Existing deployment state detected"
 fi
@@ -255,6 +256,37 @@ bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governance-loop
 log "Governance Loop health reported"
 
 log "Governance Loop completed"
+
+FIRST_DEPLOY=false
+HEARTBEAT_STATE="steady"
+
+cat > "$STATE_FILE" <<JSON
+{
+  "constellation": "Deploy_AfricaMapping_Agentic_Server_Constellation",
+  "initialized": true,
+  "first_deploy": $FIRST_DEPLOY,
+  "heartbeat_state": "$HEARTBEAT_STATE",
+  "last_deploy_result": "success",
+  "last_deploy_at": "$(date -u '+%Y-%m-%dT%H:%M:%SZ')",
+  "last_flow": "flow-05-infrastructure-health",
+  "connection_model": "shared-governed-state",
+  "servers": {
+    "server-00-foundation": { "deployed": $(bool_from_status "$SERVER_00_STATUS"), "status": "$SERVER_00_STATUS" },
+    "server-01-bastion": { "deployed": $(bool_from_status "$SERVER_01_STATUS"), "status": "$SERVER_01_STATUS" },
+    "server-02-app": { "deployed": $(bool_from_status "$SERVER_02_STATUS"), "status": "$SERVER_02_STATUS" },
+    "server-03-db": { "deployed": $(bool_from_status "$SERVER_03_STATUS"), "status": "$SERVER_03_STATUS" },
+    "server-04-storage": { "deployed": $(bool_from_status "$SERVER_04_STATUS"), "status": "$SERVER_04_STATUS" },
+    "server-05-ci-cd": { "deployed": $(bool_from_status "$SERVER_05_STATUS"), "status": "$SERVER_05_STATUS" },
+    "server-06-monitoring": { "deployed": $(bool_from_status "$SERVER_06_STATUS"), "status": "$SERVER_06_STATUS" },
+    "server-07-ai-orchestrator": { "deployed": $(bool_from_status "$SERVER_07_STATUS"), "status": "$SERVER_07_STATUS" },
+    "server-08-ai-worker": { "deployed": $(bool_from_status "$SERVER_08_STATUS"), "status": "$SERVER_08_STATUS" },
+    "server-09-ai-training": { "deployed": $(bool_from_status "$SERVER_09_STATUS"), "status": "$SERVER_09_STATUS" },
+    "server-10-applications": { "deployed": $(bool_from_status "$SERVER_10_STATUS"), "status": "$SERVER_10_STATUS" }
+  }
+}
+JSON
+
+log "Final deployment state written to $STATE_FILE"
 
 log "Deployment completed successfully"
 cat "$STATE_FILE"
