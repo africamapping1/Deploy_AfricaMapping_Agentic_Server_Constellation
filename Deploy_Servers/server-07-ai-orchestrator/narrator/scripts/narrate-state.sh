@@ -3,6 +3,13 @@ set -euo pipefail
 
 BASE="/opt/africamapping"
 STATE_FILE="$BASE/deployment-state/constellation-status.json"
+SETTLED_STATE_FILE="/opt/africamapping/deployment-state/constellation-status-settled.json"
+READ_STATE_FILE="$STATE_FILE"
+
+if [ -f "$SETTLED_STATE_FILE" ]; then
+  READ_STATE_FILE="$SETTLED_STATE_FILE"
+fi
+
 FLOW_DIR="$BASE/flows/flow-01"
 DEPLOY_LOG="/var/log/africamapping/deploy.log"
 FLOW_LOG="/var/log/africamapping/flow.log"
@@ -16,10 +23,12 @@ echo "" >> "$REPORT_FILE"
 echo "Generated at: $(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$REPORT_FILE"
 echo "" >> "$REPORT_FILE"
 
-if [ -f "$STATE_FILE" ]; then
+
+
+if [ -f "$READ_STATE_FILE" ]; then
   echo "## Deployment State" >> "$REPORT_FILE"
   echo "" >> "$REPORT_FILE"
-  grep -E '"heartbeat_state"|"last_deploy_result"|"last_deploy_at"|"last_flow"' "$STATE_FILE" >> "$REPORT_FILE" || true
+  grep -E '"heartbeat_state"|"last_deploy_result"|"last_deploy_at"|"last_flow"' "$READ_STATE_FILE" >> "$REPORT_FILE" || true
   echo "" >> "$REPORT_FILE"
 else
   echo "## Deployment State" >> "$REPORT_FILE"
@@ -55,7 +64,7 @@ fi
 echo "## Narrator Interpretation" >> "$REPORT_FILE"
 echo "" >> "$REPORT_FILE"
 
-if [ -f "$STATE_FILE" ] && grep -q '"heartbeat_state": "steady"' "$STATE_FILE"; then
+if [ -f "$READ_STATE_FILE" ] && grep -q '"heartbeat_state": "steady"' "$READ_STATE_FILE"; then
   echo "The constellation appears healthy and in a steady state." >> "$REPORT_FILE"
 else
   echo "The constellation does not currently appear steady. Review deployment state." >> "$REPORT_FILE"
