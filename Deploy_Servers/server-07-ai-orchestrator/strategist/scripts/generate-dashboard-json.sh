@@ -6,6 +6,13 @@ OUT_DIR="$BASE/Deploy_Servers/server-07-ai-orchestrator/dashboard"
 OUT_FILE="$OUT_DIR/latest-dashboard.json"
 
 STATE_FILE="$BASE/deployment-state/constellation-status.json"
+SETTLED_STATE_FILE="$BASE/deployment-state/constellation-status-settled.json"
+READ_STATE_FILE="$STATE_FILE"
+
+if [ -f "$SETTLED_STATE_FILE" ]; then
+  READ_STATE_FILE="$SETTLED_STATE_FILE"
+fi
+
 REL_FILE="$BASE/Deploy_Servers/server-07-ai-orchestrator/governance-loop/relationship-validation.md"
 GOV_FILE="$BASE/Deploy_Servers/server-07-ai-orchestrator/governor/decisions/latest-decision.md"
 INFRA_FILE="$BASE/infrastructure/latest-health.txt"
@@ -16,8 +23,8 @@ TENANTS_DIR="$BASE/tenants"
 mkdir -p "$OUT_DIR"
 
 heartbeat_state="unknown"
-if [ -f "$STATE_FILE" ]; then
-  heartbeat_state=$(grep '"heartbeat_state"' "$STATE_FILE" | head -n 1 | sed 's/.*"heartbeat_state": "\(.*\)",*/\1/')
+if [ -f "$READ_STATE_FILE" ]; then
+  heartbeat_state=$(grep '"heartbeat_state"' "$READ_STATE_FILE" | head -n 1 | sed 's/.*"heartbeat_state": "\(.*\)",*/\1/')
 fi
 
 governance_health="unknown"
