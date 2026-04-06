@@ -160,10 +160,6 @@ log "Running Flow-06 lifecycle progression"
 bash /opt/africamapping/Deploy_Servers/server-02-app/flows/process-lifecycle.sh
 log "Flow-06 lifecycle progression completed"
 
-log "Running narrator summary"
-bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/narrate-state.sh
-log "Narrator summary completed"
-
 log "Generating narrator mode summaries"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/generate-internal-summary.sh
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/generate-operator-summary.sh
@@ -320,6 +316,10 @@ JSON
 cp "$STATE_FILE" "$SETTLED_STATE_FILE"
 log "Final deployment state written to $STATE_FILE"
 log "Settled deployment state written to $SETTLED_STATE_FILE"
+
+log "Running narrator summary"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/narrate-state.sh
+log "Narrator summary completed"
 
 log "Deployment completed successfully"
 cat "$STATE_FILE"
