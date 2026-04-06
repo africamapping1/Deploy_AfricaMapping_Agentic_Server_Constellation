@@ -1,12 +1,13 @@
-# Intelligent Server Constellation — User Manual
+# ASC Intelligent Server Constellation — User Manual
 
 ## 1. What This System Is
 
-This repository defines a governed intelligent server constellation.
+This repository defines a governed intelligent server constellation for the ASC platform.
 
-It is not a traditional application or infrastructure setup.
+It is not a traditional application or a simple infrastructure setup.
 
 It is a system designed to:
+
 - receive change
 - evaluate change
 - govern change
@@ -16,16 +17,21 @@ It is a system designed to:
 
 The system is composed of multiple servers with defined roles, connected through shared state and governed flows.
 
+> Note: ASC is the platform identity. AfricaMapping, RealEstate AI, and future businesses are tenants running on the platform.
+> Current runtime paths such as `/opt/africamapping` and `/var/log/africamapping` are legacy operational roots still in use and may be migrated later.
+
 ---
 
 ## 2. Why This Exists
 
-Traditional systems are:
+Traditional systems are often:
+
 - static
 - manually maintained
 - reactive
 
 This system is designed to be:
+
 - structured but evolving
 - governed but adaptive
 - observable and accountable
@@ -36,6 +42,7 @@ It introduces:
 - flow-based architecture
 - deployment as system awakening
 - heartbeat as proof of life
+- governed interpretation through orchestrated platform roles
 
 ---
 
@@ -43,7 +50,7 @@ It introduces:
 
 ### 3.1 Lifecycle
 
-All changes move through:
+All changes move through a governed path:
 
 meet → identify → examine → judge → approve/reject → execute → observe → learn → evolve
 
@@ -59,9 +66,7 @@ Example:
 
 server-01-bastion → server-02-app → server-03-db → server-06-monitoring
 
-Flows are defined in:
-
-server-00-foundation/docs/architecture/flows/
+Flows define how the platform routes, processes, stores, and observes work.
 
 Each server implements only its role in the flow.
 
@@ -71,15 +76,16 @@ Each server implements only its role in the flow.
 
 Each server has a role:
 
-- server-00-foundation → doctrine and rules
-- server-01-bastion → intake and trust
-- server-02-app → processing
+- server-00-foundation → doctrine, policy, and standards
+- server-01-bastion → intake, trust, and entry control
+- server-02-app → processing and runtime logic
 - server-03-db → persistence
 - server-05-ci-cd → deployment control
-- server-06-monitoring → observation
-- server-07 → governance
-- server-08 → execution
-- server-09 → learning
+- server-06-monitoring → observation and health reporting
+- server-07-ai-orchestrator → governance, narration, strategy, and platform intelligence
+- server-08-ai-worker → execution work
+- server-09-ai-training → learning and model evolution
+- server-10-applications → tenant application ownership layer
 
 ---
 
@@ -90,9 +96,11 @@ The constellation is connected by shared governed state.
 This is called the "invisible line".
 
 It is created through:
+
 - shared lifecycle
 - shared deployment state
 - shared observability
+- shared governance
 - participation in flows
 
 ---
@@ -109,9 +117,11 @@ It answers:
 - What was the last deployment?
 - What was the last flow?
 
-Heartbeat is written to:
+Heartbeat is currently written to:
 
-/opt/africamapping/deployment-state/constellation-status.json
+`/opt/africamapping/deployment-state/constellation-status.json`
+
+This is a current runtime location, even though the root path still uses legacy AfricaMapping naming.
 
 ---
 
@@ -122,11 +132,14 @@ Heartbeat is written to:
 Deployment is not just copying files.
 
 Deployment:
+
 - lands
 - checks environment
 - establishes state
 - writes heartbeat
+- executes governed flows
 - confirms connected life
+- settles final platform state
 
 ---
 
@@ -135,6 +148,7 @@ Deployment:
 All deploy needs is an SSH key.
 
 The system assumes:
+
 - only SSH access is required to land
 - everything else is validated or created during deployment
 
@@ -143,19 +157,24 @@ The system assumes:
 ### 4.3 Deployment Flow
 
 GitHub Actions:
+
 - connects via SSH
 - uploads deployment scripts
 - runs bootstrap check
 
 Bootstrap:
+
 - verifies sudo
 - prepares directories
 - validates landing
 
 Deployment:
+
 - uploads constellation payload
-- writes deployment state
-- writes heartbeat
+- writes initial deployment state
+- runs governed flows
+- generates narrated and strategist outputs
+- writes final deployment state
 - logs events
 
 ---
@@ -165,12 +184,16 @@ Deployment:
 Deployment is observable in two places:
 
 GitHub:
+
 - workflow logs
 - job history
 
 Remote server:
-- /var/log/africamapping/deploy.log
+
+- `/var/log/africamapping/deploy.log`
 - deployment-state JSON
+
+These paths remain current runtime roots, though the platform identity is ASC.
 
 ---
 
@@ -180,73 +203,5 @@ Remote server:
 
 Push to GitHub:
 
+```bash
 git push
-
-This triggers GitHub Actions.
-
----
-
-### Step 2 — Observe
-
-Check:
-
-GitHub Actions tab  
-or
-
-SSH into server:
-
-cat /opt/africamapping/deployment-state/constellation-status.json  
-cat /var/log/africamapping/deploy.log
-
----
-
-### Step 3 — Understand State
-
-Look at:
-
-- heartbeat_state
-- server presence
-- last deployment result
-
----
-
-### Step 4 — Extend
-
-To extend the system:
-
-- add new flows
-- update server roles
-- introduce new servers
-- evolve lifecycle rules
-
----
-
-## 6. System Maturity
-
-This system is in an early architectural phase.
-
-It focuses on:
-
-- structure
-- lifecycle
-- flow definition
-- deployment model
-- governance philosophy
-
-Implementation evolves incrementally.
-
----
-
-## 7. Final Principle
-
-The system is not static.
-
-It is designed to continuously re-evaluate and evolve through governed cycles.
-
----
-
-## One Line Summary
-
-The constellation is not deployed once.
-
-It continuously becomes.
