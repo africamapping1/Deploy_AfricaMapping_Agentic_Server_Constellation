@@ -78,7 +78,7 @@ fi
 
 cat > "$STATE_FILE" <<JSON
 {
-  "constellation": "Deploy_AfricaMapping_Agentic_Server_Constellation",
+  "constellation": "ASC_Agentic_Server_Constellation",
   "initialized": true,
   "first_deploy": $FIRST_DEPLOY,
   "heartbeat_state": "$HEARTBEAT_STATE",
@@ -262,7 +262,7 @@ HEARTBEAT_STATE="steady"
 
 cat > "$STATE_FILE" <<JSON
 {
-  "constellation": "Deploy_AfricaMapping_Agentic_Server_Constellation",
+  "constellation": "ASC_Agentic_Server_Constellation",
   "initialized": true,
   "first_deploy": $FIRST_DEPLOY,
   "heartbeat_state": "$HEARTBEAT_STATE",
