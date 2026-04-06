@@ -125,10 +125,10 @@ bash /opt/africamapping/Deploy_Servers/server-06-monitoring/flows/observe-event.
 log "Governed flow-01 completed"
 
 log "Running Flow-02 tenant activity intake"
-bash /opt/africamapping/Deploy_Servers/server-01-bastion/flows/receive-africamapping-activity.sh
-bash /opt/africamapping/Deploy_Servers/server-02-app/flows/process-africamapping-activity.sh
-bash /opt/africamapping/Deploy_Servers/server-03-db/ops/store-africamapping-activity.sh
-bash /opt/africamapping/Deploy_Servers/server-06-monitoring/flows/observe-africamapping-activity.sh
+bash /opt/africamapping/Deploy_Servers/server-01-bastion/flows/receive-tenant-activity.sh
+bash /opt/africamapping/Deploy_Servers/server-02-app/flows/process-tenant-activity.sh
+bash /opt/africamapping/Deploy_Servers/server-03-db/ops/store-tenant-activity.sh
+bash /opt/africamapping/Deploy_Servers/server-06-monitoring/flows/observe-tenant-activity.sh
 log "Flow-02 tenant activity intake completed"
 
 log "Running Flow-03 project lifecycle"
