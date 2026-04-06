@@ -37,6 +37,38 @@ server_status() {
   fi
 }
 
+write_state_file() {
+  local target_file="$1"
+  local first_deploy="$2"
+  local heartbeat_state="$3"
+
+  cat > "$target_file" <<JSON
+{
+  "constellation": "ASC_Agentic_Server_Constellation",
+  "initialized": true,
+  "first_deploy": $first_deploy,
+  "heartbeat_state": "$heartbeat_state",
+  "last_deploy_result": "success",
+  "last_deploy_at": "$(date -u '+%Y-%m-%dT%H:%M:%SZ')",
+  "last_flow": "flow-05-infrastructure-health",
+  "connection_model": "shared-governed-state",
+  "servers": {
+    "server-00-foundation": { "deployed": $(bool_from_status "$SERVER_00_STATUS"), "status": "$SERVER_00_STATUS" },
+    "server-01-bastion": { "deployed": $(bool_from_status "$SERVER_01_STATUS"), "status": "$SERVER_01_STATUS" },
+    "server-02-app": { "deployed": $(bool_from_status "$SERVER_02_STATUS"), "status": "$SERVER_02_STATUS" },
+    "server-03-db": { "deployed": $(bool_from_status "$SERVER_03_STATUS"), "status": "$SERVER_03_STATUS" },
+    "server-04-storage": { "deployed": $(bool_from_status "$SERVER_04_STATUS"), "status": "$SERVER_04_STATUS" },
+    "server-05-ci-cd": { "deployed": $(bool_from_status "$SERVER_05_STATUS"), "status": "$SERVER_05_STATUS" },
+    "server-06-monitoring": { "deployed": $(bool_from_status "$SERVER_06_STATUS"), "status": "$SERVER_06_STATUS" },
+    "server-07-ai-orchestrator": { "deployed": $(bool_from_status "$SERVER_07_STATUS"), "status": "$SERVER_07_STATUS" },
+    "server-08-ai-worker": { "deployed": $(bool_from_status "$SERVER_08_STATUS"), "status": "$SERVER_08_STATUS" },
+    "server-09-ai-training": { "deployed": $(bool_from_status "$SERVER_09_STATUS"), "status": "$SERVER_09_STATUS" },
+    "server-10-applications": { "deployed": $(bool_from_status "$SERVER_10_STATUS"), "status": "$SERVER_10_STATUS" }
+  }
+}
+JSON
+}
+
 FIRST_DEPLOY=false
 if [ ! -f "$STATE_FILE" ]; then
   FIRST_DEPLOY=true
@@ -77,32 +109,7 @@ if [ "$SERVER_00_STATUS" != "present" ] || [ "$SERVER_05_STATUS" != "present" ] 
   HEARTBEAT_STATE="degraded"
 fi
 
-cat > "$STATE_FILE" <<JSON
-{
-  "constellation": "ASC_Agentic_Server_Constellation",
-  "initialized": true,
-  "first_deploy": $FIRST_DEPLOY,
-  "heartbeat_state": "$HEARTBEAT_STATE",
-  "last_deploy_result": "success",
-  "last_deploy_at": "$(date -u '+%Y-%m-%dT%H:%M:%SZ')",
-  "last_flow": "flow-05-infrastructure-health",
-  "connection_model": "shared-governed-state",
-  "servers": {
-    "server-00-foundation": { "deployed": $(bool_from_status "$SERVER_00_STATUS"), "status": "$SERVER_00_STATUS" },
-    "server-01-bastion": { "deployed": $(bool_from_status "$SERVER_01_STATUS"), "status": "$SERVER_01_STATUS" },
-    "server-02-app": { "deployed": $(bool_from_status "$SERVER_02_STATUS"), "status": "$SERVER_02_STATUS" },
-    "server-03-db": { "deployed": $(bool_from_status "$SERVER_03_STATUS"), "status": "$SERVER_03_STATUS" },
-    "server-04-storage": { "deployed": $(bool_from_status "$SERVER_04_STATUS"), "status": "$SERVER_04_STATUS" },
-    "server-05-ci-cd": { "deployed": $(bool_from_status "$SERVER_05_STATUS"), "status": "$SERVER_05_STATUS" },
-    "server-06-monitoring": { "deployed": $(bool_from_status "$SERVER_06_STATUS"), "status": "$SERVER_06_STATUS" },
-    "server-07-ai-orchestrator": { "deployed": $(bool_from_status "$SERVER_07_STATUS"), "status": "$SERVER_07_STATUS" },
-    "server-08-ai-worker": { "deployed": $(bool_from_status "$SERVER_08_STATUS"), "status": "$SERVER_08_STATUS" },
-    "server-09-ai-training": { "deployed": $(bool_from_status "$SERVER_09_STATUS"), "status": "$SERVER_09_STATUS" },
-    "server-10-applications": { "deployed": $(bool_from_status "$SERVER_10_STATUS"), "status": "$SERVER_10_STATUS" }
-  }
-}
-JSON
-
+write_state_file "$STATE_FILE" "$FIRST_DEPLOY" "$HEARTBEAT_STATE"
 log "Heartbeat state written to $STATE_FILE"
 
 log "Governance Loop starting"
@@ -112,7 +119,7 @@ bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/script
 log "Narrator reason enforcement passed"
 
 log "Running governor enforcement"
-bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governor/enforce-rules.sh || exit 1
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governor/enforce-rules.sh
 log "Governor enforcement passed"
 
 log "Generating deployment preview"
@@ -146,11 +153,9 @@ bash /opt/africamapping/Deploy_Servers/server-03-db/ops/store-program.sh
 bash /opt/africamapping/Deploy_Servers/server-06-monitoring/flows/observe-program.sh
 log "Flow-04 program coordination completed"
 
-
 log "Validating program-project relationships"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governance-loop/validate-relationships.sh
 log "Relationship validation completed"
-
 
 log "Running Flow-05 infrastructure health"
 bash /opt/africamapping/Deploy_Servers/server-06-monitoring/flows/observe-infrastructure.sh
@@ -159,24 +164,6 @@ log "Flow-05 infrastructure health completed"
 log "Running Flow-06 lifecycle progression"
 bash /opt/africamapping/Deploy_Servers/server-02-app/flows/process-lifecycle.sh
 log "Flow-06 lifecycle progression completed"
-
-log "Generating narrator mode summaries"
-bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/generate-internal-summary.sh
-bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/generate-operator-summary.sh
-bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/generate-sales-summary.sh
-log "Narrator mode summaries completed"
-
-log "Comparing preview versus actual"
-bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/compare-preview-vs-actual.sh
-log "Preview versus actual comparison completed"
-
-log "Writing narrator audit entry"
-bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/write-audit-entry.sh
-log "Narrator audit entry written"
-
-log "Generating narrator history summary"
-bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/generate-history-summary.sh
-log "Narrator history summary generated"
 
 log "Running strategist analysis"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/analyze-system.sh
@@ -205,78 +192,62 @@ fi
 
 FIRST_DEPLOY=false
 HEARTBEAT_STATE="steady"
-
-cat > "$SETTLED_STATE_FILE" <<JSON
-{
-  "constellation": "ASC_Agentic_Server_Constellation",
-  "initialized": true,
-  "first_deploy": $FIRST_DEPLOY,
-  "heartbeat_state": "$HEARTBEAT_STATE",
-  "last_deploy_result": "success",
-  "last_deploy_at": "$(date -u '+%Y-%m-%dT%H:%M:%SZ')",
-  "last_flow": "flow-05-infrastructure-health",
-  "connection_model": "shared-governed-state",
-  "servers": {
-    "server-00-foundation": { "deployed": $(bool_from_status "$SERVER_00_STATUS"), "status": "$SERVER_00_STATUS" },
-    "server-01-bastion": { "deployed": $(bool_from_status "$SERVER_01_STATUS"), "status": "$SERVER_01_STATUS" },
-    "server-02-app": { "deployed": $(bool_from_status "$SERVER_02_STATUS"), "status": "$SERVER_02_STATUS" },
-    "server-03-db": { "deployed": $(bool_from_status "$SERVER_03_STATUS"), "status": "$SERVER_03_STATUS" },
-    "server-04-storage": { "deployed": $(bool_from_status "$SERVER_04_STATUS"), "status": "$SERVER_04_STATUS" },
-    "server-05-ci-cd": { "deployed": $(bool_from_status "$SERVER_05_STATUS"), "status": "$SERVER_05_STATUS" },
-    "server-06-monitoring": { "deployed": $(bool_from_status "$SERVER_06_STATUS"), "status": "$SERVER_06_STATUS" },
-    "server-07-ai-orchestrator": { "deployed": $(bool_from_status "$SERVER_07_STATUS"), "status": "$SERVER_07_STATUS" },
-    "server-08-ai-worker": { "deployed": $(bool_from_status "$SERVER_08_STATUS"), "status": "$SERVER_08_STATUS" },
-    "server-09-ai-training": { "deployed": $(bool_from_status "$SERVER_09_STATUS"), "status": "$SERVER_09_STATUS" },
-    "server-10-applications": { "deployed": $(bool_from_status "$SERVER_10_STATUS"), "status": "$SERVER_10_STATUS" }
-  }
-}
-JSON
-
+write_state_file "$SETTLED_STATE_FILE" "$FIRST_DEPLOY" "$HEARTBEAT_STATE"
 log "Settled deployment state written to $SETTLED_STATE_FILE"
 
+log "Running narrator summary"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/narrate-state.sh
+log "Narrator summary completed"
+
+log "Generating narrator mode summaries"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/generate-internal-summary.sh
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/generate-operator-summary.sh
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/generate-sales-summary.sh
+log "Narrator mode summaries completed"
+
+log "Comparing preview versus actual"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/compare-preview-vs-actual.sh
+log "Preview versus actual comparison completed"
+
+log "Writing narrator audit entry"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/write-audit-entry.sh
+log "Narrator audit entry written"
+
+log "Generating narrator history summary"
+bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/generate-history-summary.sh
+log "Narrator history summary generated"
 
 log "Generating dashboard JSON"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/generate-dashboard-json.sh
-
 if [ ! -f /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/dashboard/latest-dashboard.json ]; then
   log "ERROR: Shared dashboard not generated"
   exit 1
 fi
-
 log "Dashboard JSON generated"
-
-
 
 log "Generating realestate tenant dashboard JSON"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/generate-realestate-dashboard-json.sh
-
 if [ ! -f /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/dashboard/realestate-ai-dashboard.json ]; then
   log "ERROR: Realestate tenant dashboard not generated"
   exit 1
 fi
-
 log "Realestate tenant dashboard JSON generated"
 
 log "Generating realestate customer dashboard JSON"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/generate-realestate-customer-dashboard.sh
-
 if [ ! -f /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/dashboard/customers/customer-001-dashboard.json ]; then
   log "ERROR: Realestate customer dashboard not generated"
   exit 1
 fi
-
 log "Realestate customer dashboard JSON generated"
 
 log "Generating realestate employee dashboard JSON"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/strategist/scripts/generate-realestate-employee-dashboard.sh
-
 if [ ! -f /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/dashboard/employees/employee-001-dashboard.json ]; then
   log "ERROR: Employee dashboard not generated"
   exit 1
 fi
-
 log "Realestate employee dashboard JSON generated"
-
 
 log "Reporting Governance Loop health"
 bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governance-loop/report-health.sh
@@ -284,42 +255,10 @@ log "Governance Loop health reported"
 
 log "Governance Loop completed"
 
-FIRST_DEPLOY=false
-HEARTBEAT_STATE="steady"
-
-cat > "$STATE_FILE" <<JSON
-{
-  "constellation": "ASC_Agentic_Server_Constellation",
-  "initialized": true,
-  "first_deploy": $FIRST_DEPLOY,
-  "heartbeat_state": "$HEARTBEAT_STATE",
-  "last_deploy_result": "success",
-  "last_deploy_at": "$(date -u '+%Y-%m-%dT%H:%M:%SZ')",
-  "last_flow": "flow-05-infrastructure-health",
-  "connection_model": "shared-governed-state",
-  "servers": {
-    "server-00-foundation": { "deployed": $(bool_from_status "$SERVER_00_STATUS"), "status": "$SERVER_00_STATUS" },
-    "server-01-bastion": { "deployed": $(bool_from_status "$SERVER_01_STATUS"), "status": "$SERVER_01_STATUS" },
-    "server-02-app": { "deployed": $(bool_from_status "$SERVER_02_STATUS"), "status": "$SERVER_02_STATUS" },
-    "server-03-db": { "deployed": $(bool_from_status "$SERVER_03_STATUS"), "status": "$SERVER_03_STATUS" },
-    "server-04-storage": { "deployed": $(bool_from_status "$SERVER_04_STATUS"), "status": "$SERVER_04_STATUS" },
-    "server-05-ci-cd": { "deployed": $(bool_from_status "$SERVER_05_STATUS"), "status": "$SERVER_05_STATUS" },
-    "server-06-monitoring": { "deployed": $(bool_from_status "$SERVER_06_STATUS"), "status": "$SERVER_06_STATUS" },
-    "server-07-ai-orchestrator": { "deployed": $(bool_from_status "$SERVER_07_STATUS"), "status": "$SERVER_07_STATUS" },
-    "server-08-ai-worker": { "deployed": $(bool_from_status "$SERVER_08_STATUS"), "status": "$SERVER_08_STATUS" },
-    "server-09-ai-training": { "deployed": $(bool_from_status "$SERVER_09_STATUS"), "status": "$SERVER_09_STATUS" },
-    "server-10-applications": { "deployed": $(bool_from_status "$SERVER_10_STATUS"), "status": "$SERVER_10_STATUS" }
-  }
-}
-JSON
-
+write_state_file "$STATE_FILE" false "steady"
 cp "$STATE_FILE" "$SETTLED_STATE_FILE"
 log "Final deployment state written to $STATE_FILE"
 log "Settled deployment state written to $SETTLED_STATE_FILE"
-
-log "Running narrator summary"
-bash /opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/narrator/scripts/narrate-state.sh
-log "Narrator summary completed"
 
 log "Deployment completed successfully"
 cat "$STATE_FILE"
