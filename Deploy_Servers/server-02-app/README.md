@@ -1,1 +1,2 @@
-
+server-02-app is the ASC shared runtime/app host
+tenant website/application ownership lives under server-10-applications/apps/<tenant>/...
