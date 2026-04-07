@@ -20,10 +20,30 @@ for APP in "$APPS_DIR"/*; do
 
     mkdir -p "$FLOW_DIR"
 
-    cp "$INPUT_FILE" "$FLOW_DIR/program.txt"
+    FILENAME=$(basename "$INPUT_FILE")
+    DEST_FILE="$FLOW_DIR/$FILENAME"
 
-    echo "received_by=server-01-bastion" >> "$FLOW_DIR/program.txt"
-    echo "received_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$FLOW_DIR/program.txt"
+    cp "$INPUT_FILE" "$DEST_FILE"
+
+    PROGRAM_ID=$(grep '^program_id=' "$DEST_FILE" | head -n 1 | cut -d '=' -f2- || true)
+    if [ -z "${PROGRAM_ID:-}" ]; then
+      PROGRAM_ID="$(basename "$FILENAME" .txt)"
+    fi
+
+    if ! grep -q '^tenant_id=' "$DEST_FILE"; then
+      echo "tenant_id=$BUSINESS" >> "$DEST_FILE"
+    fi
+
+    if ! grep -q '^local_program_id=' "$DEST_FILE"; then
+      echo "local_program_id=$PROGRAM_ID" >> "$DEST_FILE"
+    fi
+
+    if ! grep -q '^global_program_id=' "$DEST_FILE"; then
+      echo "global_program_id=$BUSINESS:$PROGRAM_ID" >> "$DEST_FILE"
+    fi
+
+    echo "received_by=server-01-bastion" >> "$DEST_FILE"
+    echo "received_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$DEST_FILE"
 
     echo "[bastion] program received for tenant: $BUSINESS"
   done
