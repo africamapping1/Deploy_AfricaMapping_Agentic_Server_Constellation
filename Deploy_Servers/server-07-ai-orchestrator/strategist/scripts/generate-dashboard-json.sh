@@ -2,9 +2,6 @@
 set -euo pipefail
 
 BASE="/opt/africamapping"
-OUT_DIR="$BASE/Deploy_Servers/server-07-ai-orchestrator/dashboard"
-OUT_FILE="$OUT_DIR/latest-dashboard.json"
-
 STATE_FILE="$BASE/deployment-state/constellation-status.json"
 SETTLED_STATE_FILE="$BASE/deployment-state/constellation-status-settled.json"
 READ_STATE_FILE="$STATE_FILE"
@@ -13,244 +10,253 @@ if [ -f "$SETTLED_STATE_FILE" ]; then
   READ_STATE_FILE="$SETTLED_STATE_FILE"
 fi
 
-REL_FILE="$BASE/Deploy_Servers/server-07-ai-orchestrator/governance-loop/relationship-validation.md"
-GOV_FILE="$BASE/Deploy_Servers/server-07-ai-orchestrator/governor/decisions/latest-decision.md"
+OUTPUT_DIR="$BASE/Deploy_Servers/server-07-ai-orchestrator/dashboard"
+OUTPUT_FILE="$OUTPUT_DIR/latest-dashboard.json"
+
+VALIDATION_FILE="$BASE/Deploy_Servers/server-07-ai-orchestrator/governance-loop/relationship-validation.md"
+DECISION_FILE="$BASE/Deploy_Servers/server-07-ai-orchestrator/governor/decisions/latest-decision.md"
 INFRA_FILE="$BASE/infrastructure/latest-health.txt"
-REALESTATE_PORTFOLIO_FILE="$BASE/Deploy_Servers/server-07-ai-orchestrator/strategist/outputs/realestate-portfolio-analysis.md"
-HEALTH_FILE="$BASE/Deploy_Servers/server-07-ai-orchestrator/governance-loop/latest-health.md"
 TENANTS_DIR="$BASE/tenants"
 
-mkdir -p "$OUT_DIR"
+mkdir -p "$OUTPUT_DIR"
 
-heartbeat_state="unknown"
-if [ -f "$READ_STATE_FILE" ]; then
-  heartbeat_state=$(grep '"heartbeat_state"' "$READ_STATE_FILE" | head -n 1 | sed 's/.*"heartbeat_state": "\(.*\)",*/\1/')
-fi
+python3 <<'PY' > "$OUTPUT_FILE"
+import json
+import os
+import re
+from pathlib import Path
 
-governance_health="unknown"
-if [ -f "$HEALTH_FILE" ] && grep -q "healthy" "$HEALTH_FILE"; then
-  governance_health="healthy"
-fi
+BASE = Path("/opt/africamapping")
+STATE_FILE = Path("/opt/africamapping/deployment-state/constellation-status.json")
+SETTLED_STATE_FILE = Path("/opt/africamapping/deployment-state/constellation-status-settled.json")
+READ_STATE_FILE = SETTLED_STATE_FILE if SETTLED_STATE_FILE.exists() else STATE_FILE
 
-validation_result="unknown"
-if [ -f "$REL_FILE" ]; then
-  validation_result=$(grep '^RESULT=' "$REL_FILE" | tail -n 1 | cut -d '=' -f2-)
-fi
+VALIDATION_FILE = Path("/opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governance-loop/relationship-validation.md")
+DECISION_FILE = Path("/opt/africamapping/Deploy_Servers/server-07-ai-orchestrator/governor/decisions/latest-decision.md")
+INFRA_FILE = Path("/opt/africamapping/infrastructure/latest-health.txt")
+TENANTS_DIR = Path("/opt/africamapping/tenants")
 
-governor_decision="unknown"
-if [ -f "$GOV_FILE" ]; then
-  governor_decision=$(awk '/## Decision/{getline; getline; print; exit}' "$GOV_FILE" | sed 's/"/\\"/g')
-fi
+def parse_kv_file(path: Path):
+    data = {}
+    if not path.exists():
+        return data
+    with path.open() as f:
+        for raw in f:
+            line = raw.strip()
+            if "=" in line:
+                k, v = line.split("=", 1)
+                data[k] = v
+    return data
 
-restart_required="unknown"
-gpu_status="unknown"
-if [ -f "$INFRA_FILE" ]; then
-  if grep -q "No restart required." "$INFRA_FILE"; then
-    restart_required="false"
-  elif grep -q "System restart is required." "$INFRA_FILE"; then
-    restart_required="true"
-  fi
+def read_state_heartbeat():
+    if READ_STATE_FILE.exists():
+        try:
+            return json.loads(READ_STATE_FILE.read_text()).get("heartbeat_state", "unknown")
+        except Exception:
+            pass
+    return "unknown"
 
-  if grep -q "No GPU detected." "$INFRA_FILE"; then
-    gpu_status="none"
-  else
-    gpu_status="present"
-  fi
-fi
+def read_validation_result():
+    if VALIDATION_FILE.exists():
+        m = re.search(r"RESULT=([A-Z_]+)", VALIDATION_FILE.read_text())
+        if m:
+            return m.group(1)
+    return "UNKNOWN"
 
-realestate_total_properties=0
-realestate_average_roi="0.00"
-realestate_portfolio_risk="unknown"
-realestate_recommendation="unknown"
-realestate_best_opportunity=""
-realestate_lowest_yield=""
-realestate_portfolio_value=0
-realestate_monthly_income=0
-realestate_annual_income=0
-realestate_estimated_yield_percent="0.00"
-realestate_performance_trend="stable"
-realestate_occupancy_status="unknown"
+def read_governor_decision():
+    if DECISION_FILE.exists():
+        text = DECISION_FILE.read_text().strip()
+        if text:
+            lines = [line.strip() for line in text.splitlines() if line.strip()]
+            return lines[-1]
+    return "UNKNOWN"
 
-projects_json=""
-programs_json=""
-project_count=0
-program_count=0
-alerts_json=""
-first_project=true
-first_program=true
+def read_infra():
+    restart_required = False
+    gpu = "unknown"
 
-for TENANT_PATH in "$TENANTS_DIR"/*; do
-  [ -d "$TENANT_PATH" ] || continue
+    if INFRA_FILE.exists():
+        text = INFRA_FILE.read_text()
+        if "Restart required." in text and "No restart required." not in text:
+            restart_required = True
+        if "No GPU detected." in text:
+            gpu = "none"
+        else:
+            m = re.search(r"GPU[^\\n:]*:?\s*(.+)", text)
+            if m:
+                gpu = m.group(1).strip()
 
-  FLOW03="$TENANT_PATH/flows/flow-03"
-  FLOW04="$TENANT_PATH/flows/flow-04"
+    return restart_required, gpu
 
-  for f in "$FLOW03"/*-processed.txt; do
-    [ -f "$f" ] || continue
+projects = []
+programs = []
 
-    project_id=$(grep '^project_id=' "$f" | head -n 1 | cut -d '=' -f2-)
-    project_name=$(grep '^name=' "$f" | head -n 1 | cut -d '=' -f2- | sed 's/"/\\"/g')
-    project_status=$(grep '^status=' "$f" | tail -n 1 | cut -d '=' -f2-)
+realestate_projects = []
 
-    project_count=$((project_count+1))
+for tenant_dir in sorted(TENANTS_DIR.iterdir()):
+    if not tenant_dir.is_dir():
+        continue
 
-    if [ "$first_project" = true ]; then
-      first_project=false
-    else
-      projects_json+=","
-    fi
+    tenant_name = tenant_dir.name
 
-    projects_json+="
-    {
-      \"id\": \"$project_id\",
-      \"name\": \"$project_name\",
-      \"status\": \"$project_status\"
-    }"
-  done
+    flow03 = tenant_dir / "flows" / "flow-03"
+    flow04 = tenant_dir / "flows" / "flow-04"
 
-  for f in "$FLOW04"/*-processed.txt; do
-    [ -f "$f" ] || continue
+    tenant_projects = {}
 
-    program_id=$(grep '^program_id=' "$f" | head -n 1 | cut -d '=' -f2-)
-    program_name=$(grep '^name=' "$f" | head -n 1 | cut -d '=' -f2- | sed 's/"/\\"/g')
-    program_status=$(grep '^status=' "$f" | tail -n 1 | cut -d '=' -f2-)
+    if flow03.exists():
+        for path in sorted(flow03.glob("*-processed.txt")):
+            data = parse_kv_file(path)
+            if "project_id" not in data:
+                continue
 
-    program_projects_json=""
-    first_prog_project=true
-    while IFS= read -r project_ref; do
-      [ -n "$project_ref" ] || continue
-      if [ "$first_prog_project" = true ]; then
-        first_prog_project=false
-      else
-        program_projects_json+=", "
-      fi
-      program_projects_json+="\"$project_ref\""
-    done < <(awk '/^projects:/{flag=1; next} flag && /^- /{print substr($0,3)} flag && !/^- / && NF{flag=0}' "$f")
+            local_id = data.get("project_id", path.stem.replace("-processed", ""))
+            global_id = data.get("global_project_id", f"{tenant_name}:{local_id}")
 
-    program_count=$((program_count+1))
+            item = {
+                "id": global_id,
+                "local_id": local_id,
+                "tenant_id": data.get("tenant_id", tenant_name),
+                "name": data.get("name", local_id),
+                "status": data.get("status", "unknown"),
+            }
+            projects.append(item)
+            tenant_projects[local_id] = global_id
 
-    if [ "$first_program" = true ]; then
-      first_program=false
-    else
-      programs_json+=","
-    fi
+            if tenant_name == "realestate-ai":
+                price = float(data.get("price", "0") or "0")
+                expected_rent = float(data.get("expected_rent", "0") or "0")
+                annual_income = expected_rent * 12
+                roi = round((annual_income / price) * 100, 2) if price > 0 else 0.0
 
-    programs_json+="
-    {
-      \"id\": \"$program_id\",
-      \"name\": \"$program_name\",
-      \"status\": \"$program_status\",
-      \"projects\": [${program_projects_json}]
-    }"
-  done
-done
+                realestate_projects.append({
+                    "local_id": local_id,
+                    "global_id": global_id,
+                    "name": data.get("name", local_id),
+                    "status": data.get("status", "unknown"),
+                    "price": price,
+                    "expected_rent": expected_rent,
+                    "annual_income": annual_income,
+                    "roi": roi
+                })
 
-if [ "$validation_result" != "PASS" ]; then
-  alerts_json="\"Program-project relationship issue detected\""
-fi
+    if flow04.exists():
+        for path in sorted(flow04.glob("*-processed.txt")):
+            data = parse_kv_file(path)
+            if "program_id" not in data:
+                continue
 
-if [ -f "$REALESTATE_PORTFOLIO_FILE" ]; then
-  realestate_total_properties=$(grep '^Total Properties:' "$REALESTATE_PORTFOLIO_FILE" | head -n 1 | cut -d ':' -f2- | xargs || echo 0)
-  realestate_average_roi=$(grep '^Average ROI:' "$REALESTATE_PORTFOLIO_FILE" | head -n 1 | cut -d ':' -f2- | tr -d '%' | xargs || echo "0.00")
-  realestate_portfolio_risk=$(grep '^Portfolio Risk:' "$REALESTATE_PORTFOLIO_FILE" | head -n 1 | cut -d ':' -f2- | xargs || echo "unknown")
-  realestate_recommendation=$(grep '^Recommendation:' "$REALESTATE_PORTFOLIO_FILE" | head -n 1 | cut -d ':' -f2- | xargs | sed 's/"/\\"/g' || echo "unknown")
-  realestate_best_opportunity=$(awk '/## Best Opportunity/{getline; print; exit}' "$REALESTATE_PORTFOLIO_FILE" | sed 's/"/\\"/g')
-  realestate_lowest_yield=$(awk '/## Lowest Yield/{getline; print; exit}' "$REALESTATE_PORTFOLIO_FILE" | sed 's/"/\\"/g')
-fi
+            local_program_id = data.get("program_id", path.stem.replace("-processed", ""))
+            global_program_id = data.get("global_program_id", f"{tenant_name}:{local_program_id}")
 
-REALESTATE_FLOW_DIR="$BASE/tenants/realestate-ai/flows/flow-03"
+            raw_projects = []
+            text = path.read_text().splitlines()
+            capture = False
+            for line in text:
+                stripped = line.strip()
+                if stripped == "projects:":
+                    capture = True
+                    continue
+                if capture:
+                    if stripped.startswith("- "):
+                        local_ref = stripped[2:].strip()
+                        raw_projects.append(tenant_projects.get(local_ref, f"{tenant_name}:{local_ref}"))
+                    elif stripped and not stripped.startswith("- "):
+                        capture = False
 
-if [ -d "$REALESTATE_FLOW_DIR" ]; then
-  total_price=0
-  total_expected_rent=0
-  property_count=0
+            programs.append({
+                "id": global_program_id,
+                "local_id": local_program_id,
+                "tenant_id": data.get("tenant_id", tenant_name),
+                "name": data.get("name", local_program_id),
+                "status": data.get("status", "unknown"),
+                "projects": raw_projects
+            })
 
-  for f in "$REALESTATE_FLOW_DIR"/*-processed.txt; do
-    [ -f "$f" ] || continue
+heartbeat_state = read_state_heartbeat()
+validation_result = read_validation_result()
+governor_decision = read_governor_decision()
+restart_required, gpu = read_infra()
 
-    price=$(grep '^price=' "$f" | head -n 1 | cut -d '=' -f2-)
-    expected_rent=$(grep '^expected_rent=' "$f" | head -n 1 | cut -d '=' -f2-)
+alerts = []
+if validation_result != "PASS":
+    alerts.append("Program-project relationship issue detected")
 
-    price=${price:-0}
-    expected_rent=${expected_rent:-0}
-
-    total_price=$((total_price + price))
-    total_expected_rent=$((total_expected_rent + expected_rent))
-    property_count=$((property_count + 1))
-  done
-
-  realestate_portfolio_value=$total_price
-  realestate_monthly_income=$total_expected_rent
-  realestate_annual_income=$((total_expected_rent * 12))
-
-  if [ "$total_price" -gt 0 ]; then
-    realestate_estimated_yield_percent=$(awk "BEGIN { printf \"%.2f\", ($realestate_annual_income / $total_price) * 100 }")
-  fi
-
-  trend_check=$(awk "BEGIN { if ($realestate_estimated_yield_percent >= 7.0) print 1; else print 0 }")
-  if [ "$trend_check" -eq 1 ]; then
-    realestate_performance_trend="up"
-  else
-    realestate_performance_trend="stable"
-  fi
-
-  if [ "$property_count" -gt 0 ]; then
-    realestate_occupancy_status="occupied-assumed"
-  fi
-fi
-
-cat > "$OUT_FILE" <<EOFJSON
-{
-  "generated_at": "$(date -u '+%Y-%m-%dT%H:%M:%SZ')",
-  "platform": {
-    "heartbeat_state": "$heartbeat_state",
-    "governance_health": "$governance_health"
-  },
-  "metrics": {
-    "projects": $project_count,
-    "programs": $program_count
-  },
-  "alerts": [${alerts_json}],
-
-  "projects": [${projects_json}
-  ],
-  "programs": [${programs_json}
-  ],
-
-  "realestate": {
-    "total_properties": $realestate_total_properties,
-    "portfolio_value": $realestate_portfolio_value,
-    "monthly_income": $realestate_monthly_income,
-    "annual_income": $realestate_annual_income,
-    "average_roi": $realestate_average_roi,
-    "estimated_yield_percent": $realestate_estimated_yield_percent,
-    "portfolio_risk": "$realestate_portfolio_risk",
-    "performance_trend": "$realestate_performance_trend",
-    "occupancy_status": "$realestate_occupancy_status",
-    "recommendation": "$realestate_recommendation",
-    "best_opportunity": "$realestate_best_opportunity",
-    "lowest_yield": "$realestate_lowest_yield"
-  },
-
-
-
-
-
-
-
-  "validation": {
-    "result": "$validation_result"
-  },
-
-  "governor": {
-    "decision": "$governor_decision"
-  },
-  "infrastructure": {
-    "restart_required": $restart_required,
-    "gpu": "$gpu_status"
-  }
+realestate = {
+    "total_properties": 0,
+    "portfolio_value": 0,
+    "monthly_income": 0,
+    "annual_income": 0,
+    "average_roi": 0.0,
+    "estimated_yield_percent": 0.0,
+    "portfolio_risk": "unknown",
+    "performance_trend": "unknown",
+    "occupancy_status": "unknown",
+    "recommendation": "NO DATA",
+    "best_opportunity": "none",
+    "lowest_yield": "none"
 }
-EOFJSON
 
-echo "[dashboard] JSON written to $OUT_FILE"
-cat "$OUT_FILE"
+if realestate_projects:
+    total_properties = len(realestate_projects)
+    portfolio_value = sum(p["price"] for p in realestate_projects)
+    monthly_income = sum(p["expected_rent"] for p in realestate_projects)
+    annual_income = sum(p["annual_income"] for p in realestate_projects)
+    average_roi = round(sum(p["roi"] for p in realestate_projects) / total_properties, 2)
+    estimated_yield = round((annual_income / portfolio_value) * 100, 2) if portfolio_value > 0 else 0.0
+
+    best = max(realestate_projects, key=lambda p: p["roi"])
+    worst = min(realestate_projects, key=lambda p: p["roi"])
+
+    recommendation = "SELECTIVE POTENTIAL"
+    if average_roi < 6:
+        recommendation = "LIMITED POTENTIAL"
+    elif average_roi >= 8:
+        recommendation = "STRONG POTENTIAL"
+
+    realestate = {
+        "total_properties": total_properties,
+        "portfolio_value": int(portfolio_value),
+        "monthly_income": int(monthly_income),
+        "annual_income": int(annual_income),
+        "average_roi": average_roi,
+        "estimated_yield_percent": estimated_yield,
+        "portfolio_risk": "medium",
+        "performance_trend": "up",
+        "occupancy_status": "occupied-assumed",
+        "recommendation": recommendation,
+        "best_opportunity": f'{best["global_id"]} ({best["name"]}) → {best["roi"]:.2f}%',
+        "lowest_yield": f'{worst["global_id"]} ({worst["name"]}) → {worst["roi"]:.2f}%'
+    }
+
+dashboard = {
+    "generated_at": __import__("datetime").datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+    "platform": {
+        "heartbeat_state": heartbeat_state,
+        "governance_health": "unknown"
+    },
+    "metrics": {
+        "projects": len(projects),
+        "programs": len(programs)
+    },
+    "alerts": alerts,
+    "projects": projects,
+    "programs": programs,
+    "realestate": realestate,
+    "validation": {
+        "result": validation_result
+    },
+    "governor": {
+        "decision": governor_decision
+    },
+    "infrastructure": {
+        "restart_required": restart_required,
+        "gpu": gpu
+    }
+}
+
+print(json.dumps(dashboard, indent=2))
+PY
+
+echo "[dashboard] JSON written to $OUTPUT_FILE"
+cat "$OUTPUT_FILE"
