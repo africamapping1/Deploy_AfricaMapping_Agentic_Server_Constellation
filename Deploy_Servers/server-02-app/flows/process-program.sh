@@ -23,7 +23,7 @@ for TENANT_PATH in "$TENANTS_DIR"/*; do
     FOUND=1
 
     PROGRAM_ID="$(basename "$INPUT_FILE" .txt)"
-    PROCESSED_FILE="$FLOW_DIR/${PROGRAM_ID}-processed.txt"
+    PROCESSED_FILE="$FLOW_DIR/program-processed.txt"
 
     if [ -f "$PROCESSED_FILE" ]; then
       echo "[app] $TENANT_NAME $PROGRAM_ID already processed, skipping"
