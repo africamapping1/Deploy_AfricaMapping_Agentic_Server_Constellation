@@ -80,6 +80,38 @@ check_dashboard() {
   fi
 }
 
+dashboard_uses_global_ids() {
+  local file="$1"
+  local key="$2"
+
+  [ -f "$file" ] || return 1
+
+  python3 - "$file" "$key" <<'PY'
+import json
+import sys
+
+path = sys.argv[1]
+key = sys.argv[2]
+
+try:
+    with open(path) as f:
+        data = json.load(f)
+except Exception:
+    sys.exit(1)
+
+items = data.get(key, [])
+if not isinstance(items, list) or not items:
+    sys.exit(1)
+
+for item in items:
+    value = item.get("id", "")
+    if ":" not in value:
+        sys.exit(1)
+
+sys.exit(0)
+PY
+}
+
 ########################################
 # PLATFORM CHECKS
 ########################################
@@ -187,6 +219,20 @@ check_dashboard "$SHARED_DASHBOARD" "Shared dashboard"
 check_dashboard "$TENANT_DASHBOARD" "Tenant dashboard"
 check_dashboard "$CUSTOMER_DASHBOARD" "Customer dashboard"
 check_dashboard "$EMPLOYEE_DASHBOARD" "Employee dashboard"
+
+if dashboard_uses_global_ids "$SHARED_DASHBOARD" "projects"; then
+  add_pass "Shared dashboard uses tenant-qualified global project IDs"
+else
+  add_warning "Shared dashboard does not use tenant-qualified global project IDs"
+  add_recommendation "Inspect shared dashboard project ID generation."
+fi
+
+if dashboard_uses_global_ids "$SHARED_DASHBOARD" "programs"; then
+  add_pass "Shared dashboard uses tenant-qualified global program IDs"
+else
+  add_warning "Shared dashboard does not use tenant-qualified global program IDs"
+  add_recommendation "Inspect shared dashboard program ID generation."
+fi
 
 SHARED_DASHBOARD_HEARTBEAT="$(extract_heartbeat "$SHARED_DASHBOARD")"
 TENANT_DASHBOARD_HEARTBEAT="$(extract_heartbeat "$TENANT_DASHBOARD")"
