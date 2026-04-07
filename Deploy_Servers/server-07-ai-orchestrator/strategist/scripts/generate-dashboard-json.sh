@@ -65,11 +65,17 @@ def read_validation_result():
 
 def read_governor_decision():
     if DECISION_FILE.exists():
-        text = DECISION_FILE.read_text().strip()
-        if text:
-            lines = [line.strip() for line in text.splitlines() if line.strip()]
+        lines = [line.strip() for line in DECISION_FILE.read_text().splitlines() if line.strip()]
+
+        for line in lines:
+            if line.startswith("APPROVED:") or line.startswith("REJECTED:"):
+                return line
+
+        if lines:
             return lines[-1]
+
     return "UNKNOWN"
+
 
 def read_infra():
     restart_required = False
@@ -230,7 +236,7 @@ if realestate_projects:
     }
 
 dashboard = {
-    "generated_at": __import__("datetime").datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+"generated_at": __import__("datetime").datetime.now(__import__("datetime").UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
     "platform": {
         "heartbeat_state": heartbeat_state,
         "governance_health": "unknown"
