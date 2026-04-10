@@ -2,73 +2,65 @@
 
 ## Purpose
 
-The business framework is the reusable business intelligence layer of the application plane.
+This folder defines the reusable business-thinking layer of `server-10-applications`.
 
-It exists so the system can understand, model, compare, communicate, and evolve businesses without confusing business logic with platform doctrine.
+It exists so tenant applications are not built only as isolated folders, but can instead draw from a shared business structure.
 
-This framework is generic.
+The business framework is not itself a tenant.
 
-It is not one tenant’s business.
+It is the reusable business understanding layer that helps the application plane describe, compare, review, and later govern business surfaces with more discipline.
 
-It is the reusable canvas, model set, and communication structure that tenant businesses can use.
+## Main Structure
 
-## Why This Exists
+### `foundations/`
+This contains the main business-understanding surfaces.
 
-A governed platform can execute flows and policies.
+It is where the framework explains the business through:
 
-But real application value also depends on understanding businesses as living systems.
-
-That means the system must be able to reason about:
-
-- what a business is
-- how it creates value
-- who it serves
-- how it operates
-- how it communicates
-- how it grows
-- how it explains itself to the outside world
-
-This framework provides that layer.
-
-## Core Principle
-
-The business framework is the blank canvas.
-
-Each tenant business paints its own version on top of it.
-
-The framework provides reusable structure.
-
-The tenant provides real meaning.
-
-## What Belongs Here
-
-The business framework should contain reusable business thinking structures such as:
-
-- perspectives
+- business model structure
 - canvases
-- business model frameworks
-- operating models
-- value proposition structures
-- communication frameworks
-- strategic templates
-- narrative templates
-- evaluation lenses
+- perspectives
 
-## Suggested Internal Structure
+These are the main ways of understanding what a business is.
 
-```text
-business-framework/
-├── README.md
-├── perspectives/
-├── canvases/
-├── business-model/
-│   └── nine-building-blocks/
-├── communications/
-│   ├── elevator-pitch/
-│   ├── investor-pitch/
-│   ├── customer-messaging/
-│   ├── partner-messaging/
-│   ├── internal-messaging/
-│   ├── objection-handling/
-│   └── narrative-frames/
-└── templates/
+### `expression/`
+This contains the business-expression surfaces.
+
+It is where the framework explains how business meaning is communicated outward.
+
+At present this mainly includes communications, but it may later expand to include other expression forms such as narrative or positioning.
+
+### `governance/`
+This contains the business-framework control surfaces.
+
+It is where the framework defines things such as:
+
+- minimum business definition
+- completeness rules
+- readiness rules
+- comparison basis
+- summary discipline
+- promotion candidate thinking
+
+This area helps make the framework readable by the Service Availability Matrix later.
+
+### `templates/`
+This contains reusable starting forms, blank structures, or scaffolds for future business-framework work.
+
+## Relationship to the Rest of Server-10
+
+The business framework is one of the main reusable business surfaces inside `server-10-applications`.
+
+It sits alongside:
+
+- tenant application spaces in `apps/`
+- governance and comparison logic in `service-availability-matrix/`
+- policies, intake, flows, and interfaces that help connect the business plane to the broader constellation
+
+## Final Principle
+
+The business framework should stay reusable, disciplined, and understandable.
+
+It should not become a mixed folder of unrelated notes.
+
+This folder exists so business meaning can grow in a structured way before it is carried into tenant applications and later evaluated by the Service Availability Matrix.
