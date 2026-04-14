@@ -1,0 +1,73 @@
+{
+  "tenant": "africamapping",
+  "source": {
+    "intake": "asc/intake/africamapping/intake.md",
+    "jira_mapping": "asc/jira/africamapping-jira.md",
+    "run_synthesis": "service-availability-matrix/runs/africamapping/run-synthesis.md"
+  },
+  "program": {
+    "name": "AfricaMapping Geospatial Data Production Program"
+  },
+  "projects": [
+    {
+      "name": "Imagery Acquisition System",
+      "derived_from_run": "Run-1",
+      "activities": [
+        "Identify imagery sources",
+        "Evaluate imagery quality",
+        "Select imagery source",
+        "Define retrieval process"
+      ]
+    },
+    {
+      "name": "Digitization System",
+      "derived_from_run": "Run-2",
+      "activities": [
+        "Define transformation approach",
+        "Compare manual vs automated methods",
+        "Select method",
+        "Validate method on sample"
+      ]
+    },
+    {
+      "name": "Feature Generation System",
+      "derived_from_run": "Run-3",
+      "activities": [
+        "Define feature schema",
+        "Generate sample outputs",
+        "Validate feature quality"
+      ]
+    },
+    {
+      "name": "Data Storage System",
+      "derived_from_run": "Run-4",
+      "activities": [
+        "Design storage structure",
+        "Define naming and versioning",
+        "Store outputs"
+      ]
+    },
+    {
+      "name": "Visualization System",
+      "derived_from_run": "Run-5",
+      "activities": [
+        "Define display approach",
+        "Build initial visualization",
+        "Overlay datasets"
+      ]
+    }
+  ],
+  "execution_model": {
+    "assignment_modes": ["human", "ai", "hybrid"],
+    "governed_by": "server-07-ai-orchestrator",
+    "visible_in_jira": true
+  },
+  "expected_outputs": [
+    "sample imagery selection",
+    "validated digitization method",
+    "initial feature outputs",
+    "stored GIS artifacts",
+    "first visible map layer"
+  ],
+  "status": "execution-ready"
+}
