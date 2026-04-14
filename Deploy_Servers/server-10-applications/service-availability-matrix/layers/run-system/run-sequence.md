@@ -18,7 +18,7 @@ Imagery acquisition × business canvas.
 Digitization methods × business canvas.
 
 ### Run-3
-Polygon generation × business canvas.
+Feature generation × business canvas.
 
 ### Run-4
 Data storage × business canvas.
