@@ -21,7 +21,7 @@ Examples:
 - Run-0 – Business Definition
 - Run-1 – Imagery Acquisition Business Mapping
 - Run-2 – Digitization Methods Business Mapping
-- Run-3 – Polygon Generation Business Mapping
+- Run-3 – Feature Generation Business Mapping
 - Run-4 – Data Storage Business Mapping
 - Run-5 – Visualization Business Mapping
 
@@ -35,6 +35,23 @@ Examples:
 - Identify resources
 - Define cost structure
 
+## Required Jira Context
+
+Each run-story should make clear:
+
+- run ID
+- capability name
+- capability reference folder
+- tenant or product context
+- expected output
+
+## Suggested Labels
+
+- `run-system`
+- `run-id`
+- `capability-name`
+- `tenant-name`
+
 ## Why This Mapping Works
 
 This mapping makes runs:
@@ -44,15 +61,8 @@ This mapping makes runs:
 - assignable
 - reviewable
 
-while preserving business meaning.
-
-## Suggested Labels
-
-- run-system
-- run-id
-- capability-name
-- tenant-name
+while preserving business meaning and capability reference.
 
 ## Final Principle
 
-Jira should show runs as structured work, not as vague discussion.
+Jira should show runs as structured work tied to real capability families, not as vague discussion.

@@ -1,20 +1,22 @@
-# Run Template
+k# Run Template
 
 ## Purpose
 
 This file defines the reusable template for a run.
 
-It exists so each capability can be passed through the same business interpretation structure before execution.
+It exists so each GIS capability can be passed through the same business interpretation structure before execution.
 
 ## Run ID
 - Run:
 - Capability:
+- Capability Reference:
 - Status:
 
 ## Capability Purpose
 
 - What capability is being examined?
 - Why is this capability important in the wider system?
+- Which GIS framework folder defines this capability?
 
 ## Business Canvas Mapping
 
@@ -62,6 +64,7 @@ It exists so each capability can be passed through the same business interpretat
 ## Completion Criteria
 - All business questions addressed
 - Outputs documented
+- Capability reference confirmed
 - Ready for the next run or execution decision
 
 ## Next Step
