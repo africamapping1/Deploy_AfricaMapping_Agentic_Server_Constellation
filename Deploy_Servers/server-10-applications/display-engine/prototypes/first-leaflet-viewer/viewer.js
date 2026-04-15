@@ -1,3 +1,17 @@
+function getBasemapConfig(basemapName) {
+  if (basemapName === "carto-light") {
+    return {
+      url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+      attribution: "&copy; OpenStreetMap contributors &copy; CARTO"
+    };
+  }
+
+  return {
+    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    attribution: "&copy; OpenStreetMap contributors"
+  };
+}
+
 async function loadViewer() {
   const statusEl = document.getElementById("status");
 
@@ -10,21 +24,31 @@ async function loadViewer() {
     }
 
     const config = await configResponse.json();
+    const params = new URLSearchParams(window.location.search);
 
-    document.title = config.title || document.title;
+    const title = params.get("title") || config.title;
+    const lat = parseFloat(params.get("lat") || config.map.center[0]);
+    const lon = parseFloat(params.get("lon") || config.map.center[1]);
+    const zoom = parseInt(params.get("zoom") || config.map.zoom, 10);
+    const basemapName = params.get("basemap") || "osm";
+    const geoJsonUrl = params.get("geojson") || config.data.geoJsonUrl;
+
+    const basemap = getBasemapConfig(basemapName);
+
+    document.title = title || document.title;
+    const heading = document.querySelector("#header h1");
+    if (heading && title) heading.textContent = title;
+
     statusEl.textContent = config.statusLoadingMessage || "Loading GeoJSON...";
 
-    const map = L.map("map").setView(
-      config.map.center,
-      config.map.zoom
-    );
+    const map = L.map("map").setView([lat, lon], zoom);
 
-    L.tileLayer(config.basemap.url, {
+    L.tileLayer(basemap.url, {
       maxZoom: config.map.maxZoom || 22,
-      attribution: config.basemap.attribution || ""
+      attribution: basemap.attribution || ""
     }).addTo(map);
 
-    const geoJsonResponse = await fetch(config.data.geoJsonUrl);
+    const geoJsonResponse = await fetch(geoJsonUrl);
     if (!geoJsonResponse.ok) {
       throw new Error(`Failed to load GeoJSON: ${geoJsonResponse.status}`);
     }
