@@ -1,0 +1,23 @@
+{
+  "title": "AfricaMapping First Leaflet Viewer",
+  "statusReadyMessage": "GeoJSON loaded successfully.",
+  "statusLoadingMessage": "Loading GeoJSON...",
+  "map": {
+    "center": [9.0225, 38.7470],
+    "zoom": 16,
+    "maxZoom": 22
+  },
+  "basemap": {
+    "url": "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    "attribution": "&copy; OpenStreetMap contributors"
+  },
+  "data": {
+    "geoJsonUrl": "./africamapping-first-polygon.geojson"
+  },
+  "popupFields": [
+    "id",
+    "tenant",
+    "layer",
+    "status"
+  ]
+}
