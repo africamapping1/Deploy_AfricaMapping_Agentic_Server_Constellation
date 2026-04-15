@@ -1,0 +1,14 @@
+{
+  "name": "africamapping-review",
+  "title": "AfricaMapping Review Mode",
+  "map": {
+    "center": [9.0225, 38.7470],
+    "zoom": 17,
+    "maxZoom": 22
+  },
+  "basemap": "osm",
+  "data": {
+    "geoJsonUrl": "../prototypes/first-leaflet-viewer/africamapping-first-polygon.geojson"
+  },
+  "popupFields": ["id", "status"]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "africamapping-light",
+  "title": "AfricaMapping Light View",
+  "map": {
+    "center": [9.0225, 38.7470],
+    "zoom": 15,
+    "maxZoom": 22
+  },
+  "basemap": "carto-light",
+  "data": {
+    "geoJsonUrl": "../prototypes/first-leaflet-viewer/africamapping-first-polygon.geojson"
+  },
+  "popupFields": ["id"]
+}
