@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Display Engine Manual Config Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+    }
+
+    .wrap {
+      max-width: 900px;
+      margin: 24px auto;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 24px;
+    }
+
+    p {
+      color: #555;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    input, select {
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .actions {
+      margin-top: 20px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 10px 16px;
+      border: 0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button.primary {
+      background: #222;
+      color: white;
+    }
+
+    button.secondary {
+      background: #eee;
+      color: #222;
+    }
+
+    .note {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #666;
+      background: #faf7e8;
+      border: 1px solid #eee2a8;
+      padding: 12px;
+      border-radius: 6px;
+    }
+
+    code {
+      background: #f2f2f2;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Display Engine Manual Config Dashboard</h1>
+    <p>Configure a simple viewer session without editing files manually.</p>
+
+    <div class="grid">
+      <div class="field full">
+        <label for="title">Viewer Title</label>
+        <input id="title" type="text" value="AfricaMapping First Leaflet Viewer" />
+      </div>
+
+      <div class="field">
+        <label for="lat">Center Latitude</label>
+        <input id="lat" type="number" step="any" value="9.0225" />
+      </div>
+
+      <div class="field">
+        <label for="lon">Center Longitude</label>
+        <input id="lon" type="number" step="any" value="38.7470" />
+      </div>
+
+      <div class="field">
+        <label for="zoom">Zoom</label>
+        <input id="zoom" type="number" step="1" value="16" />
+      </div>
+
+      <div class="field">
+        <label for="basemap">Basemap</label>
+        <select id="basemap">
+          <option value="osm">OpenStreetMap</option>
+          <option value="carto-light">Carto Light</option>
+        </select>
+      </div>
+
+      <div class="field full">
+        <label for="geojson">GeoJSON URL</label>
+        <input id="geojson" type="text" value="../../prototypes/first-leaflet-viewer/africamapping-first-polygon.geojson" />
+      </div>
+
+      <div class="field full">
+        <label for="viewerUrl">Viewer URL</label>
+        <input id="viewerUrl" type="text" value="../../prototypes/first-leaflet-viewer/index.html" />
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="primary" id="openViewer">Open Viewer With Config</button>
+      <button class="secondary" id="resetDefaults">Reset Defaults</button>
+    </div>
+
+    <div class="note">
+      This prototype passes config through the URL to the viewer. Later this can be replaced with saved profiles, API-backed config, or ASC-driven display setup.
+    </div>
+  </div>
+
+  <script>
+    const defaults = {
+      title: "AfricaMapping First Leaflet Viewer",
+      lat: "9.0225",
+      lon: "38.7470",
+      zoom: "16",
+      basemap: "osm",
+      geojson: "../../prototypes/first-leaflet-viewer/africamapping-first-polygon.geojson",
+      viewerUrl: "../../prototypes/first-leaflet-viewer/index.html"
+    };
+
+    function getValue(id) {
+      return document.getElementById(id).value;
+    }
+
+    function setValue(id, value) {
+      document.getElementById(id).value = value;
+    }
+
+    document.getElementById("openViewer").addEventListener("click", () => {
+      const params = new URLSearchParams({
+        title: getValue("title"),
+        lat: getValue("lat"),
+        lon: getValue("lon"),
+        zoom: getValue("zoom"),
+        basemap: getValue("basemap"),
+        geojson: getValue("geojson")
+      });
+
+      const viewerUrl = getValue("viewerUrl");
+      window.open(`${viewerUrl}?${params.toString()}`, "_blank");
+    });
+
+    document.getElementById("resetDefaults").addEventListener("click", () => {
+      Object.entries(defaults).forEach(([key, value]) => setValue(key, value));
+    });
+  </script>
+</body>
+</html>
