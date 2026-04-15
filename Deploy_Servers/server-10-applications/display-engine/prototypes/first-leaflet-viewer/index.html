@@ -64,7 +64,22 @@
     </div>
 
     <div id="status">Loading viewer...</div>
-    <div id="map"></div>
+    <div style="display:flex; height:100%;">
+  
+      <!-- LEFT PANEL -->
+      <div id="layerPanel" style="width:220px; border-right:1px solid #ddd; padding:10px; background:#fafafa;">
+        <strong>Layers</strong><br><br>
+    
+        <label>
+          <input type="checkbox" id="layerToggle" checked />
+          Polygon Layer
+        </label>
+      </div>
+
+      <!-- MAP -->
+      <div id="map" style="flex:1;"></div>
+
+    </div>
   </div>
 
   <script
@@ -76,3 +91,4 @@
   <script src="./viewer.js"></script>
 </body>
 </html>
+

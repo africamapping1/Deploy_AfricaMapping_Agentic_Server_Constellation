@@ -23,6 +23,7 @@ async function loadViewer() {
 
     let config;
 
+    // Load profile if provided, otherwise fallback to config.json
     if (profileUrl) {
       const response = await fetch(profileUrl);
       if (!response.ok) {
@@ -39,22 +40,28 @@ async function loadViewer() {
 
     const basemap = getBasemapConfig(config.basemap || "osm");
 
+    // Update title
     document.title = config.title || document.title;
     const heading = document.querySelector("#header h1");
-    if (heading && config.title) heading.textContent = config.title;
+    if (heading && config.title) {
+      heading.textContent = config.title;
+    }
 
     statusEl.textContent = config.statusLoadingMessage || "Loading GeoJSON...";
 
+    // Create map
     const map = L.map("map").setView(
       config.map.center,
       config.map.zoom
     );
 
+    // Add basemap
     L.tileLayer(basemap.url, {
       maxZoom: config.map.maxZoom || 22,
       attribution: basemap.attribution || ""
     }).addTo(map);
 
+    // Load GeoJSON
     const geoJsonResponse = await fetch(config.data.geoJsonUrl);
     if (!geoJsonResponse.ok) {
       throw new Error(`Failed to load GeoJSON: ${geoJsonResponse.status}`);
@@ -62,7 +69,8 @@ async function loadViewer() {
 
     const geoJsonData = await geoJsonResponse.json();
 
-    const layer = L.geoJSON(geoJsonData, {
+    // Create layer
+    let geoJsonLayer = L.geoJSON(geoJsonData, {
       onEachFeature: (feature, leafletLayer) => {
         const props = feature.properties || {};
         const popupFields = config.popupFields || [];
@@ -78,15 +86,32 @@ async function loadViewer() {
       }
     }).addTo(map);
 
-    if (layer.getBounds && layer.getBounds().isValid()) {
-      map.fitBounds(layer.getBounds(), { padding: [20, 20] });
+    // Layer toggle
+    const toggle = document.getElementById("layerToggle");
+
+    if (toggle) {
+      toggle.addEventListener("change", () => {
+        if (toggle.checked) {
+          geoJsonLayer.addTo(map);
+        } else {
+          map.removeLayer(geoJsonLayer);
+        }
+      });
+    }
+
+    // Fit map to bounds
+    if (geoJsonLayer.getBounds && geoJsonLayer.getBounds().isValid()) {
+      map.fitBounds(geoJsonLayer.getBounds(), { padding: [20, 20] });
     }
 
     statusEl.textContent =
       config.statusReadyMessage || "GeoJSON loaded successfully.";
+
   } catch (error) {
     console.error(error);
-    statusEl.textContent = `Error: ${error.message}`;
+    if (statusEl) {
+      statusEl.textContent = `Error: ${error.message}`;
+    }
   }
 }
 
