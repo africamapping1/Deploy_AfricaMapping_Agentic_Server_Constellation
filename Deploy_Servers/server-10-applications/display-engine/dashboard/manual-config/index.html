@@ -93,51 +93,21 @@
       padding: 12px;
       border-radius: 6px;
     }
-
-    code {
-      background: #f2f2f2;
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>Display Engine Manual Config Dashboard</h1>
-    <p>Configure a simple viewer session without editing files manually.</p>
+    <p>Select a reusable display profile and open the viewer.</p>
 
     <div class="grid">
       <div class="field full">
-        <label for="title">Viewer Title</label>
-        <input id="title" type="text" value="AfricaMapping First Leaflet Viewer" />
-      </div>
-
-      <div class="field">
-        <label for="lat">Center Latitude</label>
-        <input id="lat" type="number" step="any" value="9.0225" />
-      </div>
-
-      <div class="field">
-        <label for="lon">Center Longitude</label>
-        <input id="lon" type="number" step="any" value="38.7470" />
-      </div>
-
-      <div class="field">
-        <label for="zoom">Zoom</label>
-        <input id="zoom" type="number" step="1" value="16" />
-      </div>
-
-      <div class="field">
-        <label for="basemap">Basemap</label>
-        <select id="basemap">
-          <option value="osm">OpenStreetMap</option>
-          <option value="carto-light">Carto Light</option>
+        <label for="profile">Select Profile</label>
+        <select id="profile">
+          <option value="../../profiles/africamapping-basic.json">
+            africamapping-basic
+          </option>
         </select>
-      </div>
-
-      <div class="field full">
-        <label for="geojson">GeoJSON URL</label>
-        <input id="geojson" type="text" value="../../prototypes/first-leaflet-viewer/africamapping-first-polygon.geojson" />
       </div>
 
       <div class="field full">
@@ -147,29 +117,20 @@
     </div>
 
     <div class="actions">
-      <button class="primary" id="openViewer">Open Viewer With Config</button>
+      <button class="primary" id="openViewer">Open Viewer With Profile</button>
       <button class="secondary" id="resetDefaults">Reset Defaults</button>
     </div>
 
     <div class="note">
-      This prototype passes config through the URL to the viewer. Later this can be replaced with saved profiles, API-backed config, or ASC-driven display setup.
+      This version uses reusable profile files instead of many manual URL parameters.
     </div>
   </div>
 
   <script>
     const defaults = {
-      title: "AfricaMapping First Leaflet Viewer",
-      lat: "9.0225",
-      lon: "38.7470",
-      zoom: "16",
-      basemap: "osm",
-      geojson: "../../prototypes/first-leaflet-viewer/africamapping-first-polygon.geojson",
+      profile: "../../profiles/africamapping-basic.json",
       viewerUrl: "../../prototypes/first-leaflet-viewer/index.html"
     };
-
-    function getValue(id) {
-      return document.getElementById(id).value;
-    }
 
     function setValue(id, value) {
       document.getElementById(id).value = value;
@@ -177,15 +138,10 @@
 
     document.getElementById("openViewer").addEventListener("click", () => {
       const params = new URLSearchParams({
-        title: getValue("title"),
-        lat: getValue("lat"),
-        lon: getValue("lon"),
-        zoom: getValue("zoom"),
-        basemap: getValue("basemap"),
-        geojson: getValue("geojson")
+        profile: document.getElementById("profile").value
       });
 
-      const viewerUrl = getValue("viewerUrl");
+      const viewerUrl = document.getElementById("viewerUrl").value;
       window.open(`${viewerUrl}?${params.toString()}`, "_blank");
     });
 

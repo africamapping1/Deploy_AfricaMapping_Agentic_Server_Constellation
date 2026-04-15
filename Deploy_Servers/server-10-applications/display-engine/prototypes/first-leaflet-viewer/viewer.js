@@ -18,37 +18,44 @@ async function loadViewer() {
   try {
     statusEl.textContent = "Loading configuration...";
 
-    const configResponse = await fetch("./config.json");
-    if (!configResponse.ok) {
-      throw new Error(`Failed to load config.json: ${configResponse.status}`);
+    const params = new URLSearchParams(window.location.search);
+    const profileUrl = params.get("profile");
+
+    let config;
+
+    if (profileUrl) {
+      const response = await fetch(profileUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to load profile: ${response.status}`);
+      }
+      config = await response.json();
+    } else {
+      const configResponse = await fetch("./config.json");
+      if (!configResponse.ok) {
+        throw new Error(`Failed to load config.json: ${configResponse.status}`);
+      }
+      config = await configResponse.json();
     }
 
-    const config = await configResponse.json();
-    const params = new URLSearchParams(window.location.search);
+    const basemap = getBasemapConfig(config.basemap || "osm");
 
-    const title = params.get("title") || config.title;
-    const lat = parseFloat(params.get("lat") || config.map.center[0]);
-    const lon = parseFloat(params.get("lon") || config.map.center[1]);
-    const zoom = parseInt(params.get("zoom") || config.map.zoom, 10);
-    const basemapName = params.get("basemap") || "osm";
-    const geoJsonUrl = params.get("geojson") || config.data.geoJsonUrl;
-
-    const basemap = getBasemapConfig(basemapName);
-
-    document.title = title || document.title;
+    document.title = config.title || document.title;
     const heading = document.querySelector("#header h1");
-    if (heading && title) heading.textContent = title;
+    if (heading && config.title) heading.textContent = config.title;
 
     statusEl.textContent = config.statusLoadingMessage || "Loading GeoJSON...";
 
-    const map = L.map("map").setView([lat, lon], zoom);
+    const map = L.map("map").setView(
+      config.map.center,
+      config.map.zoom
+    );
 
     L.tileLayer(basemap.url, {
       maxZoom: config.map.maxZoom || 22,
       attribution: basemap.attribution || ""
     }).addTo(map);
 
-    const geoJsonResponse = await fetch(geoJsonUrl);
+    const geoJsonResponse = await fetch(config.data.geoJsonUrl);
     if (!geoJsonResponse.ok) {
       throw new Error(`Failed to load GeoJSON: ${geoJsonResponse.status}`);
     }
