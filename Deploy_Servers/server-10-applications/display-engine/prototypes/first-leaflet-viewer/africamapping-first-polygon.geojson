@@ -1,1 +1,27 @@
-find it
+{
+  "type": "FeatureCollection",
+  "name": "africamapping-first-polygon",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "polygon-001",
+        "tenant": "africamapping",
+        "layer": "buildings",
+        "status": "demo"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [38.7465, 9.0220],
+            [38.7475, 9.0220],
+            [38.7475, 9.0230],
+            [38.7465, 9.0230],
+            [38.7465, 9.0220]
+          ]
+        ]
+      }
+    }
+  ]
+}
