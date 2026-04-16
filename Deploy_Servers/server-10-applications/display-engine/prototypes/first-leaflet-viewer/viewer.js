@@ -5,6 +5,7 @@ function getBasemapConfig(basemap) {
   if (basemapName === "carto-light") {
     return {
       name: "carto-light",
+      label: "Carto Light",
       url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
       attribution: "&copy; OpenStreetMap contributors &copy; CARTO"
     };
@@ -12,9 +13,15 @@ function getBasemapConfig(basemap) {
 
   return {
     name: "osm",
+    label: "OpenStreetMap",
     url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     attribution: "&copy; OpenStreetMap contributors"
   };
+}
+
+function updateText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
 }
 
 async function loadViewer() {
@@ -72,6 +79,8 @@ async function loadViewer() {
       attribution: startingBasemap.attribution || ""
     }).addTo(map);
 
+    updateText("basemapReadout", startingBasemap.label);
+
     const activeLayer =
       layers.find((layer) => layer.visible !== false) || layers[0];
 
@@ -113,6 +122,8 @@ async function loadViewer() {
       }
     }).addTo(map);
 
+    updateText("layerReadout", `${activeLayer.name} (on)`);
+
     const toggle = document.getElementById("layerToggle");
 
     if (toggle) {
@@ -124,8 +135,10 @@ async function loadViewer() {
       toggle.addEventListener("change", () => {
         if (toggle.checked) {
           geoJsonLayer.addTo(map);
+          updateText("layerReadout", `${activeLayer.name} (on)`);
         } else {
           map.removeLayer(geoJsonLayer);
+          updateText("layerReadout", `${activeLayer.name} (off)`);
         }
       });
     }
@@ -144,8 +157,20 @@ async function loadViewer() {
           maxZoom,
           attribution: nextBasemap.attribution || ""
         }).addTo(map);
+
+        updateText("basemapReadout", nextBasemap.label);
       });
     }
+
+    map.on("mousemove", (e) => {
+      const lat = e.latlng.lat.toFixed(5);
+      const lng = e.latlng.lng.toFixed(5);
+      updateText("coordReadout", `${lat}, ${lng}`);
+    });
+
+    map.on("mouseout", () => {
+      updateText("coordReadout", "--, --");
+    });
 
     if (geoJsonLayer.getBounds && geoJsonLayer.getBounds().isValid()) {
       map.fitBounds(geoJsonLayer.getBounds(), { padding: [20, 20] });

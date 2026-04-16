@@ -50,9 +50,47 @@
       border-bottom: 1px solid #eee;
     }
 
+    #main {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+
+    #layerPanel {
+      width: 220px;
+      border-right: 1px solid #ddd;
+      padding: 10px;
+      background: #fafafa;
+      box-sizing: border-box;
+    }
+
+    #layerPanel select {
+      width: 100%;
+      margin: 6px 0 16px 0;
+      padding: 6px;
+    }
+
+    #mapWrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
     #map {
       flex: 1;
       min-height: 400px;
+    }
+
+    #statusBar {
+      display: flex;
+      gap: 16px;
+      padding: 8px 12px;
+      font-size: 12px;
+      border-top: 1px solid #ddd;
+      background: #f7f7f7;
+      color: #333;
+      flex-wrap: wrap;
     }
   </style>
 </head>
@@ -64,26 +102,32 @@
     </div>
 
     <div id="status">Loading viewer...</div>
-    <div style="display:flex; height:100%;">
-  
-      <!-- LEFT PANEL -->
-<div id="layerPanel" style="width:220px; border-right:1px solid #ddd; padding:10px; background:#fafafa;">
-  <strong>Display Controls</strong><br><br>
 
-  <label for="basemapSelect"><strong>Basemap</strong></label><br>
-  <select id="basemapSelect" style="width:100%; margin:6px 0 16px 0; padding:6px;">
-    <option value="osm">OpenStreetMap</option>
-    <option value="carto-light">Carto Light</option>
-  </select>
+    <div id="main">
+      <div id="layerPanel">
+        <strong>Display Controls</strong><br><br>
 
-  <label>
-    <input type="checkbox" id="layerToggle" checked />
-    Polygon Layer
-  </label>
-</div>
-      <!-- MAP -->
-      <div id="map" style="flex:1;"></div>
+        <label for="basemapSelect"><strong>Basemap</strong></label><br>
+        <select id="basemapSelect">
+          <option value="osm">OpenStreetMap</option>
+          <option value="carto-light">Carto Light</option>
+        </select>
 
+        <label>
+          <input type="checkbox" id="layerToggle" checked />
+          Polygon Layer
+        </label>
+      </div>
+
+      <div id="mapWrap">
+        <div id="map"></div>
+
+        <div id="statusBar">
+          <div><strong>Coords:</strong> <span id="coordReadout">--, --</span></div>
+          <div><strong>Basemap:</strong> <span id="basemapReadout">--</span></div>
+          <div><strong>Layer:</strong> <span id="layerReadout">--</span></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -96,4 +140,3 @@
   <script src="./viewer.js"></script>
 </body>
 </html>
-
