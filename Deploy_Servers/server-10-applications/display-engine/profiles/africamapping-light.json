@@ -22,21 +22,56 @@
   },
   "layers": [
     {
+      "name": "water",
+      "type": "geojson",
+      "source": "./water.geojson",
+      "visible": true,
+      "opacity": 0.7,
+      "popupFields": ["id", "layer", "status"],
+      "style": {
+        "color": "#1d4ed8",
+        "weight": 2,
+        "fillColor": "#60a5fa",
+        "fillOpacity": 0.5
+      }
+    },
+    {
+      "name": "landcover",
+      "type": "geojson",
+      "source": "./landcover.geojson",
+      "visible": true,
+      "opacity": 0.5,
+      "popupFields": ["id", "layer", "status"],
+      "style": {
+        "color": "#15803d",
+        "weight": 2,
+        "fillColor": "#4ade80",
+        "fillOpacity": 0.35
+      }
+    },
+    {
       "name": "buildings",
       "type": "geojson",
-      "source": "../prototypes/first-leaflet-viewer/africamapping-first-polygon.geojson",
+      "source": "./africamapping-first-polygon.geojson",
       "visible": true,
-      "popupFields": ["id"]
+      "opacity": 1,
+      "popupFields": ["id", "tenant", "layer", "status"],
+      "style": {
+        "color": "#b91c1c",
+        "weight": 2,
+        "fillColor": "#fca5a5",
+        "fillOpacity": 0.45
+      }
     }
   ],
   "widgets": {
     "layerToggle": true,
-    "scaleBar": false,
-    "coordinateReadout": false
+    "scaleBar": true,
+    "coordinateReadout": true
   },
   "interaction": {
     "selectionEnabled": true,
-    "popupFields": ["id"]
+    "popupFields": ["id", "layer", "status"]
   },
   "styling": {
     "theme": "light"
