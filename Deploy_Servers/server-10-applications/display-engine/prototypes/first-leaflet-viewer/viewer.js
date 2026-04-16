@@ -52,6 +52,7 @@ async function loadViewer() {
     const identity = config.identity || {};
     const mapConfig = config.map || {};
     const basemapConfig = config.basemap || "osm";
+    const projection = config.projection || {};
     const layers = config.layers || [];
     const interaction = config.interaction || {};
     const widgets = config.widgets || {};
@@ -65,6 +66,14 @@ async function loadViewer() {
     if (heading && title) {
       heading.textContent = title;
     }
+
+    updateText("profileName", identity.name || "--");
+    updateText("profileTitle", identity.title || "--");
+    updateText("profileTenant", identity.tenant || "--");
+    updateText("profileVersion", identity.version || "--");
+    updateText("profileStatus", identity.status || "--");
+    updateText("profileMode", mapConfig.mode || "--");
+    updateText("profileProjection", projection.coordinateSystem || "--");
 
     statusEl.textContent = config.statusLoadingMessage || "Loading GeoJSON...";
 
@@ -80,6 +89,10 @@ async function loadViewer() {
     }).addTo(map);
 
     updateText("basemapReadout", startingBasemap.label);
+
+    if (widgets.scaleBar !== false) {
+      L.control.scale().addTo(map);
+    }
 
     const activeLayer =
       layers.find((layer) => layer.visible !== false) || layers[0];

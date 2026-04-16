@@ -57,17 +57,31 @@
     }
 
     #layerPanel {
-      width: 220px;
+      width: 260px;
       border-right: 1px solid #ddd;
       padding: 10px;
       background: #fafafa;
       box-sizing: border-box;
+      overflow-y: auto;
     }
 
     #layerPanel select {
       width: 100%;
       margin: 6px 0 16px 0;
       padding: 6px;
+    }
+
+    #profileInfo {
+      margin-top: 18px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+      font-size: 13px;
+      color: #333;
+    }
+
+    #profileInfo div {
+      margin-bottom: 8px;
+      word-break: break-word;
     }
 
     #mapWrap {
@@ -117,6 +131,17 @@
           <input type="checkbox" id="layerToggle" checked />
           Polygon Layer
         </label>
+
+        <div id="profileInfo">
+          <strong>Profile Info</strong><br><br>
+          <div><strong>Name:</strong> <span id="profileName">--</span></div>
+          <div><strong>Title:</strong> <span id="profileTitle">--</span></div>
+          <div><strong>Tenant:</strong> <span id="profileTenant">--</span></div>
+          <div><strong>Version:</strong> <span id="profileVersion">--</span></div>
+          <div><strong>Status:</strong> <span id="profileStatus">--</span></div>
+          <div><strong>Mode:</strong> <span id="profileMode">--</span></div>
+          <div><strong>Projection:</strong> <span id="profileProjection">--</span></div>
+        </div>
       </div>
 
       <div id="mapWrap">
