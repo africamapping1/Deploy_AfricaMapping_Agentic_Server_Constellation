@@ -1,14 +1,44 @@
 {
-  "name": "africamapping-review",
-  "title": "AfricaMapping Review Mode",
+  "identity": {
+    "name": "africamapping-review",
+    "title": "AfricaMapping Review Mode",
+    "tenant": "africamapping",
+    "version": "v1",
+    "status": "active"
+  },
   "map": {
     "center": [9.0225, 38.7470],
     "zoom": 17,
-    "maxZoom": 22
+    "maxZoom": 22,
+    "mode": "2d"
   },
-  "basemap": "osm",
-  "data": {
-    "geoJsonUrl": "../prototypes/first-leaflet-viewer/africamapping-first-polygon.geojson"
+  "basemap": {
+    "name": "osm",
+    "provider": "OpenStreetMap"
   },
-  "popupFields": ["id", "status"]
+  "projection": {
+    "coordinateSystem": "EPSG:4326",
+    "transformation": null
+  },
+  "layers": [
+    {
+      "name": "buildings",
+      "type": "geojson",
+      "source": "../prototypes/first-leaflet-viewer/africamapping-first-polygon.geojson",
+      "visible": true,
+      "popupFields": ["id", "status"]
+    }
+  ],
+  "widgets": {
+    "layerToggle": true,
+    "scaleBar": false,
+    "coordinateReadout": false
+  },
+  "interaction": {
+    "selectionEnabled": true,
+    "popupFields": ["id", "status"]
+  },
+  "styling": {
+    "theme": "review"
+  }
 }

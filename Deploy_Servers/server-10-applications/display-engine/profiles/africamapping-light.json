@@ -1,14 +1,44 @@
 {
-  "name": "africamapping-light",
-  "title": "AfricaMapping Light View",
+  "identity": {
+    "name": "africamapping-light",
+    "title": "AfricaMapping Light View",
+    "tenant": "africamapping",
+    "version": "v1",
+    "status": "active"
+  },
   "map": {
     "center": [9.0225, 38.7470],
     "zoom": 15,
-    "maxZoom": 22
+    "maxZoom": 22,
+    "mode": "2d"
   },
-  "basemap": "carto-light",
-  "data": {
-    "geoJsonUrl": "../prototypes/first-leaflet-viewer/africamapping-first-polygon.geojson"
+  "basemap": {
+    "name": "carto-light",
+    "provider": "CARTO"
   },
-  "popupFields": ["id"]
+  "projection": {
+    "coordinateSystem": "EPSG:4326",
+    "transformation": null
+  },
+  "layers": [
+    {
+      "name": "buildings",
+      "type": "geojson",
+      "source": "../prototypes/first-leaflet-viewer/africamapping-first-polygon.geojson",
+      "visible": true,
+      "popupFields": ["id"]
+    }
+  ],
+  "widgets": {
+    "layerToggle": true,
+    "scaleBar": false,
+    "coordinateReadout": false
+  },
+  "interaction": {
+    "selectionEnabled": true,
+    "popupFields": ["id"]
+  },
+  "styling": {
+    "theme": "light"
+  }
 }
