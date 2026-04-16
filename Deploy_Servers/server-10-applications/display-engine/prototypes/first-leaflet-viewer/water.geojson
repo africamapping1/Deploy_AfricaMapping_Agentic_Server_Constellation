@@ -1,0 +1,26 @@
+{
+  "type": "FeatureCollection",
+  "name": "water",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "water-001",
+        "layer": "water",
+        "status": "demo"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [38.7448, 9.0216],
+            [38.7458, 9.0216],
+            [38.7458, 9.0224],
+            [38.7448, 9.0224],
+            [38.7448, 9.0216]
+          ]
+        ]
+      }
+    }
+  ]
+}

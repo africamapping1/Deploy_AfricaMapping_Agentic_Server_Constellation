@@ -1,0 +1,26 @@
+{
+  "type": "FeatureCollection",
+  "name": "landcover",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "landcover-001",
+        "layer": "landcover",
+        "status": "demo"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [38.7456, 9.0218],
+            [38.7482, 9.0218],
+            [38.7482, 9.0240],
+            [38.7456, 9.0240],
+            [38.7456, 9.0218]
+          ]
+        ]
+      }
+    }
+  ]
+}

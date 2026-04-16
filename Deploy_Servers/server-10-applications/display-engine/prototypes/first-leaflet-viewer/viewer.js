@@ -24,12 +24,16 @@ function updateText(id, value) {
   if (el) el.textContent = value;
 }
 
-function applyOpacityToLayer(leafletLayer, opacity) {
+function applyOpacityToLayer(leafletLayer, opacity, baseStyle = {}) {
   leafletLayer.eachLayer((child) => {
     if (child.setStyle) {
       child.setStyle({
+        ...baseStyle,
         opacity,
-        fillOpacity: Math.max(0.1, Math.min(opacity, 1))
+        fillOpacity:
+          typeof baseStyle.fillOpacity === "number"
+            ? Math.min(baseStyle.fillOpacity, opacity)
+            : Math.max(0.1, Math.min(opacity, 1))
       });
     }
   });
@@ -184,7 +188,7 @@ async function loadViewer() {
         opacityInput.addEventListener("input", () => {
           entry.opacity = parseFloat(opacityInput.value);
           opacityLabel.textContent = `Opacity: ${entry.opacity.toFixed(2)}`;
-          applyOpacityToLayer(entry.layer, entry.opacity);
+          applyOpacityToLayer(entry.layer, entry.opacity, entry.style);
         });
 
         const orderRow = document.createElement("div");
@@ -249,7 +253,10 @@ async function loadViewer() {
           interaction.popupFields ||
           [];
 
+        const style = layerDef.style || {};
+
         const leafletLayer = L.geoJSON(data, {
+          style: () => style,
           onEachFeature: (feature, layer) => {
             const props = feature.properties || {};
 
@@ -268,13 +275,14 @@ async function loadViewer() {
           leafletLayer.addTo(map);
         }
 
-        applyOpacityToLayer(leafletLayer, opacity);
+        applyOpacityToLayer(leafletLayer, opacity, style);
 
         layerInstances.push({
           def: layerDef,
           layer: leafletLayer,
           visible,
-          opacity
+          opacity,
+          style
         });
       } catch (err) {
         console.error("Layer error:", layerDef.name, err);
