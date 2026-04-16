@@ -204,35 +204,35 @@ async function loadViewer() {
         downBtn.textContent = "Down";
         downBtn.style.flex = "1";
 
-        if (index === layerInstances.length - 1) {
-          upBtn.disabled = true;
-        }
+if (index === 0) {
+  upBtn.disabled = true;
+}
 
-        if (index === 0) {
-          downBtn.disabled = true;
-        }
+if (index === layerInstances.length - 1) {
+  downBtn.disabled = true;
+}
 
-        upBtn.addEventListener("click", () => {
-          if (index < layerInstances.length - 1) {
-            const temp = layerInstances[index];
-            layerInstances[index] = layerInstances[index + 1];
-            layerInstances[index + 1] = temp;
+upBtn.addEventListener("click", () => {
+  if (index > 0) {
+    const temp = layerInstances[index];
+    layerInstances[index] = layerInstances[index - 1];
+    layerInstances[index - 1] = temp;
 
-            renderLayerControls();
-            redrawLayerOrder();
-          }
-        });
+    renderLayerControls();
+    redrawLayerOrder();
+  }
+});
 
-        downBtn.addEventListener("click", () => {
-          if (index > 0) {
-            const temp = layerInstances[index];
-            layerInstances[index] = layerInstances[index - 1];
-            layerInstances[index - 1] = temp;
+downBtn.addEventListener("click", () => {
+  if (index < layerInstances.length - 1) {
+    const temp = layerInstances[index];
+    layerInstances[index] = layerInstances[index + 1];
+    layerInstances[index + 1] = temp;
 
-            renderLayerControls();
-            redrawLayerOrder();
-          }
-        });
+    renderLayerControls();
+    redrawLayerOrder();
+  }
+});
 
         orderRow.appendChild(upBtn);
         orderRow.appendChild(downBtn);
