@@ -56,7 +56,7 @@ async function loadViewer() {
       config = await res.json();
     } else {
       const res = await fetch("./config.json");
-      if (!res.ok) throw new Error(`config.json load failed`);
+      if (!res.ok) throw new Error("config.json load failed");
       config = await res.json();
     }
 
@@ -89,6 +89,7 @@ async function loadViewer() {
     const map = L.map("map").setView(center, zoom);
 
     let basemapLayer;
+
     function applyBasemap(basemap) {
       const cfg = getBasemapConfig(basemap);
 
@@ -136,10 +137,10 @@ async function loadViewer() {
         wrapper.style.marginBottom = "8px";
         wrapper.style.background = "#fff";
 
-        const title = document.createElement("div");
-        title.style.fontWeight = "600";
-        title.style.marginBottom = "6px";
-        title.textContent = entry.def.name;
+        const titleEl = document.createElement("div");
+        titleEl.style.fontWeight = "600";
+        titleEl.style.marginBottom = "6px";
+        titleEl.textContent = entry.def.name;
 
         const toggleRow = document.createElement("div");
         toggleRow.style.marginBottom = "6px";
@@ -203,11 +204,20 @@ async function loadViewer() {
         downBtn.textContent = "Down";
         downBtn.style.flex = "1";
 
+        if (index === layerInstances.length - 1) {
+          upBtn.disabled = true;
+        }
+
+        if (index === 0) {
+          downBtn.disabled = true;
+        }
+
         upBtn.addEventListener("click", () => {
           if (index < layerInstances.length - 1) {
             const temp = layerInstances[index];
             layerInstances[index] = layerInstances[index + 1];
             layerInstances[index + 1] = temp;
+
             renderLayerControls();
             redrawLayerOrder();
           }
@@ -218,6 +228,7 @@ async function loadViewer() {
             const temp = layerInstances[index];
             layerInstances[index] = layerInstances[index - 1];
             layerInstances[index - 1] = temp;
+
             renderLayerControls();
             redrawLayerOrder();
           }
@@ -226,7 +237,7 @@ async function loadViewer() {
         orderRow.appendChild(upBtn);
         orderRow.appendChild(downBtn);
 
-        wrapper.appendChild(title);
+        wrapper.appendChild(titleEl);
         wrapper.appendChild(toggleRow);
         wrapper.appendChild(opacityLabel);
         wrapper.appendChild(opacityInput);
@@ -269,7 +280,8 @@ async function loadViewer() {
         });
 
         const visible = layerDef.visible !== false;
-        const opacity = typeof layerDef.opacity === "number" ? layerDef.opacity : 1;
+        const opacity =
+          typeof layerDef.opacity === "number" ? layerDef.opacity : 1;
 
         if (visible) {
           leafletLayer.addTo(map);
