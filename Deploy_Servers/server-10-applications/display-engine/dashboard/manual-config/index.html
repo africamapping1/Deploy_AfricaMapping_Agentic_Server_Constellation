@@ -132,28 +132,52 @@
     </div>
   </div>
 
-  <script>
-    const defaults = {
-      profile: "../../profiles/africamapping-basic.json",
-      viewerUrl: "../../prototypes/first-leaflet-viewer/index.html"
-    };
+<script>
+  const defaults = {
+    profile: "../../profiles/africamapping-basic.json",
+    viewerUrl: "../../prototypes/first-leaflet-viewer/index.html"
+  };
 
-    function setValue(id, value) {
-      document.getElementById(id).value = value;
+  function setValue(id, value) {
+    document.getElementById(id).value = value;
+  }
+
+  async function loadProfileInfo(profilePath) {
+    try {
+      const res = await fetch(profilePath);
+      if (!res.ok) throw new Error("Failed to load profile");
+
+      const profile = await res.json();
+
+      const identity = profile.identity || {};
+
+      console.log("Loaded profile:", identity.name, identity.title);
+    } catch (err) {
+      console.error("Profile load error:", err);
     }
+  }
 
-    document.getElementById("openViewer").addEventListener("click", () => {
-      const params = new URLSearchParams({
-        profile: document.getElementById("profile").value
-      });
+  const profileSelect = document.getElementById("profile");
 
-      const viewerUrl = document.getElementById("viewerUrl").value;
-      window.open(`${viewerUrl}?${params.toString()}`, "_blank");
+  // Load initial profile info
+  loadProfileInfo(profileSelect.value);
+
+  profileSelect.addEventListener("change", () => {
+    loadProfileInfo(profileSelect.value);
+  });
+
+  document.getElementById("openViewer").addEventListener("click", () => {
+    const params = new URLSearchParams({
+      profile: document.getElementById("profile").value
     });
 
-    document.getElementById("resetDefaults").addEventListener("click", () => {
-      Object.entries(defaults).forEach(([key, value]) => setValue(key, value));
-    });
-  </script>
+    const viewerUrl = document.getElementById("viewerUrl").value;
+    window.open(`${viewerUrl}?${params.toString()}`, "_blank");
+  });
+
+  document.getElementById("resetDefaults").addEventListener("click", () => {
+    Object.entries(defaults).forEach(([key, value]) => setValue(key, value));
+  });
+</script>
 </body>
 </html>
