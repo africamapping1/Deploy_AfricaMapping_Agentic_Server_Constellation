@@ -4,12 +4,14 @@ function getBasemapConfig(basemap) {
 
   if (basemapName === "carto-light") {
     return {
+      name: "carto-light",
       url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
       attribution: "&copy; OpenStreetMap contributors &copy; CARTO"
     };
   }
 
   return {
+    name: "osm",
     url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     attribution: "&copy; OpenStreetMap contributors"
   };
@@ -26,7 +28,6 @@ async function loadViewer() {
 
     let config;
 
-    // Load profile if provided, otherwise fallback to config.json
     if (profileUrl) {
       const response = await fetch(profileUrl);
       if (!response.ok) {
@@ -41,7 +42,6 @@ async function loadViewer() {
       config = await configResponse.json();
     }
 
-    // Support new schema structure first, fallback to old structure if needed
     const identity = config.identity || {};
     const mapConfig = config.map || {};
     const basemapConfig = config.basemap || "osm";
@@ -49,9 +49,8 @@ async function loadViewer() {
     const interaction = config.interaction || {};
     const widgets = config.widgets || {};
 
-    const basemap = getBasemapConfig(basemapConfig);
+    const startingBasemap = getBasemapConfig(basemapConfig);
 
-    // Update title
     const title = identity.title || config.title || document.title;
     document.title = title;
 
@@ -62,20 +61,17 @@ async function loadViewer() {
 
     statusEl.textContent = config.statusLoadingMessage || "Loading GeoJSON...";
 
-    // Create map
     const center = mapConfig.center || [9.0225, 38.7470];
     const zoom = mapConfig.zoom || 16;
     const maxZoom = mapConfig.maxZoom || 22;
 
     const map = L.map("map").setView(center, zoom);
 
-    // Add basemap
-    L.tileLayer(basemap.url, {
+    let basemapLayer = L.tileLayer(startingBasemap.url, {
       maxZoom,
-      attribution: basemap.attribution || ""
+      attribution: startingBasemap.attribution || ""
     }).addTo(map);
 
-    // For now, use the first visible layer
     const activeLayer =
       layers.find((layer) => layer.visible !== false) || layers[0];
 
@@ -87,7 +83,6 @@ async function loadViewer() {
       throw new Error(`Unsupported layer type: ${activeLayer.type}`);
     }
 
-    // Load GeoJSON
     const geoJsonResponse = await fetch(activeLayer.source);
     if (!geoJsonResponse.ok) {
       throw new Error(`Failed to load GeoJSON: ${geoJsonResponse.status}`);
@@ -101,7 +96,6 @@ async function loadViewer() {
       config.popupFields ||
       [];
 
-    // Create layer
     let geoJsonLayer = L.geoJSON(geoJsonData, {
       onEachFeature: (feature, leafletLayer) => {
         const props = feature.properties || {};
@@ -119,11 +113,9 @@ async function loadViewer() {
       }
     }).addTo(map);
 
-    // Layer toggle
     const toggle = document.getElementById("layerToggle");
 
     if (toggle) {
-      // Respect widget config if later you want to disable the toggle
       if (widgets.layerToggle === false) {
         toggle.checked = true;
         toggle.disabled = true;
@@ -138,7 +130,23 @@ async function loadViewer() {
       });
     }
 
-    // Fit map to bounds
+    const basemapSelect = document.getElementById("basemapSelect");
+
+    if (basemapSelect) {
+      basemapSelect.value = startingBasemap.name;
+
+      basemapSelect.addEventListener("change", () => {
+        const nextBasemap = getBasemapConfig(basemapSelect.value);
+
+        map.removeLayer(basemapLayer);
+
+        basemapLayer = L.tileLayer(nextBasemap.url, {
+          maxZoom,
+          attribution: nextBasemap.attribution || ""
+        }).addTo(map);
+      });
+    }
+
     if (geoJsonLayer.getBounds && geoJsonLayer.getBounds().isValid()) {
       map.fitBounds(geoJsonLayer.getBounds(), { padding: [20, 20] });
     }

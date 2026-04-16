@@ -67,15 +67,20 @@
     <div style="display:flex; height:100%;">
   
       <!-- LEFT PANEL -->
-      <div id="layerPanel" style="width:220px; border-right:1px solid #ddd; padding:10px; background:#fafafa;">
-        <strong>Layers</strong><br><br>
-    
-        <label>
-          <input type="checkbox" id="layerToggle" checked />
-          Polygon Layer
-        </label>
-      </div>
+<div id="layerPanel" style="width:220px; border-right:1px solid #ddd; padding:10px; background:#fafafa;">
+  <strong>Display Controls</strong><br><br>
 
+  <label for="basemapSelect"><strong>Basemap</strong></label><br>
+  <select id="basemapSelect" style="width:100%; margin:6px 0 16px 0; padding:6px;">
+    <option value="osm">OpenStreetMap</option>
+    <option value="carto-light">Carto Light</option>
+  </select>
+
+  <label>
+    <input type="checkbox" id="layerToggle" checked />
+    Polygon Layer
+  </label>
+</div>
       <!-- MAP -->
       <div id="map" style="flex:1;"></div>
 
