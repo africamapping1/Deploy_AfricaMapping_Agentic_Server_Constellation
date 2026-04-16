@@ -24,7 +24,7 @@
     {
       "name": "buildings",
       "type": "geojson",
-      "source": "../prototypes/first-leaflet-viewer/africamapping-first-polygon.geojson",
+      "source": "./africamapping-first-polygon.geojson",
       "visible": true,
       "popupFields": ["id", "tenant", "layer", "status"]
     }
