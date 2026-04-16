@@ -24,7 +24,7 @@
     {
       "name": "water",
       "type": "geojson",
-      "source": "../prototypes/first-leaflet-viewer/water.geojson",
+      "source": "./water.geojson"
       "visible": true,
       "opacity": 0.7,
       "popupFields": ["id", "layer", "status"],
