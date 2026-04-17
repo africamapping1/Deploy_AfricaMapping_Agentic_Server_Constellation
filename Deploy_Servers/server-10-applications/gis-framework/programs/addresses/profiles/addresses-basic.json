@@ -15,18 +15,23 @@
   "basemap": {
     "name": "osm"
   },
+  "projection": {
+    "coordinateSystem": "EPSG:4326",
+    "transformation": null
+  },
   "layers": [
     {
       "name": "buildings",
       "type": "geojson",
-      "source": "/prototypes/first-leaflet-viewer/africamapping-first-polygon.geojson",
+      "source": "/display-engine/prototypes/first-leaflet-viewer/africamapping-first-polygon.geojson",
       "visible": true,
       "opacity": 0.6,
       "style": {
         "color": "#b91c1c",
         "fillColor": "#fca5a5",
         "fillOpacity": 0.4
-      }
+      },
+      "popupFields": ["id", "tenant", "layer", "status"]
     },
     {
       "name": "addresses",
@@ -42,5 +47,8 @@
   ],
   "widgets": {
     "scaleBar": true
+  },
+  "interaction": {
+    "popupFields": ["id", "address", "status"]
   }
 }
