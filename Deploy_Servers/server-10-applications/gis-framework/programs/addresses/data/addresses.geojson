@@ -7,11 +7,12 @@
       "properties": {
         "id": "addr-001",
         "address": "Building A",
-        "status": "demo"
+        "building_id": "polygon-001",
+        "status": "demo-linked"
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [38.7465, 9.0228]
+        "coordinates": [38.7468, 9.0225]
       }
     },
     {
@@ -19,11 +20,12 @@
       "properties": {
         "id": "addr-002",
         "address": "Building B",
-        "status": "demo"
+        "building_id": "polygon-001",
+        "status": "demo-linked"
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [38.7472, 9.0232]
+        "coordinates": [38.7471, 9.0227]
       }
     }
   ]

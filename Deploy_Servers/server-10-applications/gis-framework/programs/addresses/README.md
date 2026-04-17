@@ -5,9 +5,9 @@
 The Addresses program is a composite GIS program that consumes:
 
 - the display engine
-- foundational spatial programs (buildings, land cover, water)
+- foundational spatial programs, especially buildings
 
-It provides structured address-related spatial outputs.
+It produces address-related spatial outputs that can later support search, navigation, geocoding, and administrative workflows.
 
 ---
 
@@ -15,9 +15,10 @@ It provides structured address-related spatial outputs.
 
 The program aims to:
 
-- represent address locations spatially
-- associate addresses with buildings
-- support navigation, search, and mapping use cases
+- represent addresses spatially as points
+- relate addresses to buildings
+- provide display-ready address layers
+- prepare for later address intelligence workflows
 
 ---
 
@@ -27,43 +28,33 @@ The program aims to:
 Provides:
 - rendering
 - interaction
-- configuration
+- profile-driven display
+- layer controls
 
 ### Foundational Programs
-- Buildings (primary)
+- Buildings (primary dependency)
 - Land Cover (context)
 - Water (context)
 
 ---
 
-## 4. Outputs
+## 4. Current Output
 
-- address points (GeoJSON)
-- address-to-building relationships (future)
-- display-ready layers
+Current stage output includes:
 
----
-
-## 5. Current Stage
-
-Stage 1:
-
-- simple GeoJSON address points
-- display through display engine
-
-Future stages:
-
-- geocoding
-- validation
-- enrichment
-- linking to buildings
+- address points
+- `building_id` linkage to buildings
+- display-ready GeoJSON
 
 ---
 
-## 6. Relationship
+## 5. Current Relationship Model
 
-Display Engine
+The current model is simple:
+
+```text
+address point
     ↓
-Foundational Programs (Buildings, Land Cover, Water)
+building_id reference
     ↓
-Addresses Program
+building layer

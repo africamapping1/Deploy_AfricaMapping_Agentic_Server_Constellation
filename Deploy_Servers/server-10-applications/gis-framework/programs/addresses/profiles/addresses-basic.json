@@ -31,7 +31,7 @@
         "fillColor": "#fca5a5",
         "fillOpacity": 0.4
       },
-      "popupFields": ["id", "tenant", "layer", "status"]
+      "popupFields": ["id", "address", "building_id", "status"]
     },
     {
       "name": "addresses",
