@@ -1,0 +1,30 @@
+{
+  "type": "FeatureCollection",
+  "name": "addresses",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "addr-001",
+        "address": "Building A",
+        "status": "demo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [38.7465, 9.0228]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "addr-002",
+        "address": "Building B",
+        "status": "demo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [38.7472, 9.0232]
+      }
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "identity": {
+    "name": "addresses-basic",
+    "title": "Addresses Viewer",
+    "tenant": "africamapping",
+    "version": "v1",
+    "status": "active"
+  },
+  "map": {
+    "center": [9.0225, 38.7470],
+    "zoom": 16,
+    "maxZoom": 22,
+    "mode": "2d"
+  },
+  "basemap": {
+    "name": "osm"
+  },
+  "layers": [
+    {
+      "name": "buildings",
+      "type": "geojson",
+      "source": "/prototypes/first-leaflet-viewer/africamapping-first-polygon.geojson",
+      "visible": true,
+      "opacity": 0.6,
+      "style": {
+        "color": "#b91c1c",
+        "fillColor": "#fca5a5",
+        "fillOpacity": 0.4
+      }
+    },
+    {
+      "name": "addresses",
+      "type": "geojson",
+      "source": "/gis-framework/programs/addresses/data/addresses.geojson",
+      "visible": true,
+      "opacity": 1,
+      "style": {
+        "color": "#111827"
+      },
+      "popupFields": ["id", "address", "status"]
+    }
+  ],
+  "widgets": {
+    "scaleBar": true
+  }
+}
