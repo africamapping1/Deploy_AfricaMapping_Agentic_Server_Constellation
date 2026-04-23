@@ -11,16 +11,6 @@ function getBasemapConfig(basemap) {
     };
   }
 
-if (name === "imagery") {
-  return {
-    name: "imagery",
-    label: "Imagery",
-    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    attribution: "Tiles &copy; Esri"
-  };
-}
-
-
   return {
     name: "osm",
     label: "OpenStreetMap",
@@ -78,7 +68,6 @@ async function loadViewer() {
     const interaction = config.interaction || {};
     const widgets = config.widgets || {};
 
-
 if (!identity.name) {
   throw new Error("Profile missing identity.name");
 }
@@ -104,7 +93,6 @@ for (const layer of layers) {
     throw new Error(`Layer ${layer.name} missing source.`);
   }
 }
-
 
     const title = identity.title || "Viewer";
     document.title = title;
