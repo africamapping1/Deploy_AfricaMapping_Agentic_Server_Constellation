@@ -1,0 +1,26 @@
+Issue Type,Summary,Description,Parent,Labels
+Sub-task,Create map container HTML,"Add div container for map rendering.",Initialize map and base view,"display-engine"
+Sub-task,Initialize Leaflet map instance,"Create map object and set default center/zoom.",Initialize map and base view,"display-engine"
+
+Sub-task,Parse layers from profile,"Read layers array from JSON profile.",Implement layer rendering system,"display-engine"
+Sub-task,Load GeoJSON data,"Fetch GeoJSON from source path.",Implement layer rendering system,"display-engine"
+Sub-task,Render GeoJSON layer,"Add layer to map using Leaflet.",Implement layer rendering system,"display-engine"
+
+Sub-task,Create Up button,"Add button for moving layer up.",Implement layer ordering controls,"display-engine"
+Sub-task,Create Down button,"Add button for moving layer down.",Implement layer ordering controls,"display-engine"
+Sub-task,Handle boundary logic,"Disable buttons at top/bottom.",Implement layer ordering controls,"display-engine"
+
+Sub-task,Create opacity slider,"Add input range control.",Implement opacity controls,"display-engine"
+Sub-task,Apply opacity to layer,"Update layer style dynamically.",Implement opacity controls,"display-engine"
+
+Sub-task,Extract popup fields,"Read popupFields from profile.",Implement popup system,"display-engine"
+Sub-task,Render popup HTML,"Bind popup to layer features.",Implement popup system,"display-engine"
+
+Sub-task,Validate profile structure,"Check required fields exist.",Add profile validation checks,"display-engine"
+Sub-task,Handle missing values,"Gracefully handle errors.",Add profile validation checks,"display-engine"
+
+Sub-task,Create dashboard layout,"Build HTML structure.",Create dashboard UI layout,"dashboard"
+Sub-task,Add config inputs,"Add UI controls for config.",Create dashboard UI layout,"dashboard"
+
+Sub-task,Embed map preview,"Render map inside dashboard.",Embed live preview map in dashboard,"dashboard"
+Sub-task,Sync config to preview,"Update map on changes.",Embed live preview map in dashboard,"dashboard"

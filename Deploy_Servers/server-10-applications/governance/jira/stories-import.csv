@@ -1,0 +1,75 @@
+Issue Type,Summary,Description,Epic Link,Labels
+Story,Initialize map and base view,"Set up Leaflet map initialization with default center, zoom, and container setup.",Display Engine Core,"team-display-engine"
+Story,Implement layer rendering system,"Load GeoJSON layers dynamically from profile configuration.",Display Engine Core,"team-display-engine"
+Story,Implement layer ordering controls,"Add Up/Down controls with boundary checks and redraw logic.",Display Engine Core,"team-display-engine"
+Story,Implement opacity controls,"Add per-layer opacity slider and apply styles dynamically.",Display Engine Core,"team-display-engine"
+Story,Implement popup system,"Display feature attributes using popupFields from profile.",Display Engine Core,"team-display-engine"
+
+Story,Create profile JSON schema,"Define structure for display profiles including identity, map, layers, and widgets.",Profile System,"team-display-engine"
+Story,Implement profile loader,"Load profile via URL parameter and fallback config.",Profile System,"team-display-engine"
+Story,Add profile validation checks,"Validate required fields and handle missing/invalid configurations.",Profile System,"team-display-engine"
+
+Story,Create dashboard UI layout,"Build dashboard layout for configuration inputs and controls.",Dashboard Config Preview Dispatch,"team-display-engine"
+Story,Embed live preview map in dashboard,"Display map inside dashboard for real-time configuration feedback.",Dashboard Config Preview Dispatch,"team-display-engine"
+Story,Implement profile dispatch logic,"Allow sending selected profile to viewer/program.",Dashboard Config Preview Dispatch,"team-display-engine"
+Story,Add triage state handling,"Mark unsupported configurations and escalate to drawing board.",Dashboard Config Preview Dispatch,"team-display-engine"
+
+Story,Add OSM basemap support,"Implement OpenStreetMap tile layer as default basemap.",Basemap Adapter Layer,"team-display-engine"
+Story,Add imagery basemap option,"Add imagery provider option to basemap selector.",Basemap Adapter Layer,"team-display-engine"
+
+Story,Define imagery program structure,"Create folders and README for imagery program.",External Imagery Integration,"team-imagery"
+Story,Integrate external imagery provider,"Enable external imagery tiles in display engine.",External Imagery Integration,"team-imagery"
+
+Story,Define imagery processing stages,"Document ingestion, preprocessing, and output pipeline.",Internal Imagery Processing Pipeline,"team-imagery"
+Story,Prototype imagery ingestion workflow,"Define how raw imagery enters system.",Internal Imagery Processing Pipeline,"team-imagery"
+
+Story,Define tile generation approach,"Document tile pyramid and storage structure.",Tile Generation System,"team-imagery"
+Story,Prototype tile generation script,"Create basic workflow for tile creation (conceptual).",Tile Generation System,"team-imagery"
+
+Story,Define imagery serving endpoints,"Design how tiles are exposed to display engine.",Imagery Serving,"team-imagery"
+
+Story,Create initial buildings dataset,"Digitize sample building polygons.",Buildings Program,"team-foundational-gis"
+Story,Add building styling in profile,"Define building visualization styles.",Buildings Program,"team-foundational-gis"
+
+Story,Create land cover sample dataset,"Add simple land cover polygons.",Land Cover Program,"team-foundational-gis"
+Story,Define land cover styles,"Add styling rules for land cover.",Land Cover Program,"team-foundational-gis"
+
+Story,Create water sample dataset,"Add simple water body polygons.",Water Program,"team-foundational-gis"
+Story,Define water styling,"Add styling rules for water layers.",Water Program,"team-foundational-gis"
+
+Story,Define QA validation workflow,"Outline validation steps for spatial data.",Data Quality and Validation,"team-foundational-gis"
+Story,Create review checklist,"Create manual review process for datasets.",Data Quality and Validation,"team-foundational-gis"
+
+Story,Create address dataset,"Create GeoJSON address points.",Addresses Program,"team-composite-gis"
+Story,Display addresses in viewer,"Render address layer in display engine.",Addresses Program,"team-composite-gis"
+
+Story,Link addresses to buildings,"Add building_id reference to address features.",Address Building Relationship,"team-composite-gis"
+Story,Show building linkage in popup,"Display building_id in popup fields.",Address Building Relationship,"team-composite-gis"
+
+Story,Define composite program template,"Create reusable structure for future GIS programs.",Future GIS Programs,"team-composite-gis"
+
+Story,Create basic website structure,"Set up frontend app folder and initial pages.",AfricaMapping Web Platform,"team-frontend"
+Story,Integrate map viewer into UI,"Embed display engine into frontend application.",Map Experience Integration,"team-frontend"
+
+Story,Design search UI,"Create input for address search.",Address Search Experience,"team-frontend"
+Story,Display search results on map,"Link search results to map interaction.",Address Search Experience,"team-frontend"
+
+Story,Set up deployment script,"Create deployment pipeline script.",Deployment Pipeline,"team-infrastructure"
+Story,Automate GitHub deployment,"Integrate CI/CD workflow.",Deployment Pipeline,"team-infrastructure"
+
+Story,Configure nginx serving,"Serve static files via nginx.",Web Serving Nginx,"team-infrastructure"
+Story,Map domain to server,"Prepare domain routing for AfricaMapping.",Web Serving Nginx,"team-infrastructure"
+
+Story,Define systemd service,"Create service for persistent processes.",System Services Systemd,"team-infrastructure"
+
+Story,Set up logging system,"Define logging structure.",Monitoring and Health,"team-infrastructure"
+Story,Add basic health checks,"Monitor service availability.",Monitoring and Health,"team-infrastructure"
+
+Story,Define lifecycle workflow,"Implement intake → approval flow.",Lifecycle Management,"team-governance"
+Story,Track decisions in system,"Store approval and execution logs.",Lifecycle Management,"team-governance"
+
+Story,Define policy files,"Create policy and rules documentation.",Policy Framework,"team-governance"
+
+Story,Create SAM tracking structure,"Define readiness and maturity tracking.",SAM Integration,"team-governance"
+
+Story,Implement narrator logs,"Track system history and activity.",Narrator and Reporting,"team-governance"
