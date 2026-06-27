@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# (line endings normalized to LF)
 set -euo pipefail
 
 APP_DIR="/opt/africamapping/Deploy_Servers/server-02-app/app"
