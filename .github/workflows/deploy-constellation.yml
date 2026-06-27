@@ -52,6 +52,18 @@ jobs:
             "${{ secrets.LINODE_USER }}@${{ secrets.LINODE_HOST }}" \
             'bash /opt/africamapping/Deploy_Servers/server-05-ci-cd/pipelines/deploy/deploy-constellation.sh'
 
+      - name: Run remote app deploy (constellation service)
+        run: |
+          ssh -p "${{ secrets.LINODE_PORT }}" \
+            "${{ secrets.LINODE_USER }}@${{ secrets.LINODE_HOST }}" \
+            'bash /opt/africamapping/Deploy_Servers/server-02-app/deploy/deploy.sh'
+
+      - name: Verify constellation service is live
+        run: |
+          ssh -p "${{ secrets.LINODE_PORT }}" \
+            "${{ secrets.LINODE_USER }}@${{ secrets.LINODE_HOST }}" \
+            'curl -fsS http://localhost/health'
+
       - name: Show remote heartbeat state
         run: |
           ssh -p "${{ secrets.LINODE_PORT }}" \
